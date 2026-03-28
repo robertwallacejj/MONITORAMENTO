@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Insucessos | Monitoramento de Entregas SP</title>
+
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/insucessos.css" />
+
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script defer src="../assets/js/core/config.js"></script>
+  <script defer src="../assets/js/core/runtime.js"></script>
+
+</head>
+<body data-page="insucessos">
+  <header class="topbar">
+    <div class="topbar-left">
+      <img src="../assets/img/logo-monitoramento.png" alt="Logo Monitoramento" class="brand-logo-img" />
+      <div>
+        <h1 class="page-title">INSUCESSOS</h1>
+
+<div class="tabs">
+  <a href="./dashboard.html" class="tab-btn">Dashboard</a>
+  <a href="./insucessos.html" class="tab-btn active">Insucessos</a>
+  <a href="./acompanhamento-geral.html" class="tab-btn">Acompanhamento Geral</a>
+</div>
+
+<p class="page-subtitle">Consolidação semanal de insucessos por base, data, motivo e motorista</p>
+        <div class="header-quick-links"><a href="../index.html" class="btn-secondary header-home-link">Menu inicial</a></div>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <button id="clearDataBtn" class="btn-secondary btn-danger-soft" type="button">Limpar dados locais</button>
+      <button id="importBtn" class="btn-primary" type="button">Importar Excels</button>
+      <input type="file" id="excelFiles" accept=".xlsx,.xls" multiple hidden />
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero-bar">
+      <div>
+        <h2>Painel de insucessos</h2>
+        <p>Importe todos os arquivos da semana e veja um dashboard consolidado por data, base, motivo e entregador.</p>
+      </div>
+
+      <div class="hero-meta">
+        <div class="hero-tag" id="lastUpdateText">Última leitura: --</div>
+        <div class="hero-tag" id="storageStatus">Dados locais: vazios</div>
+      </div>
+    </section>
+
+    <section class="card import-status-card">
+      <div class="section-header">
+        <h3>Status da importação</h3>
+        <span class="badge badge-neutral" id="importPreviewBadge">Nenhum arquivo selecionado</span>
+      </div>
+
+      <p class="text-soft">
+        Importe todos os relatórios de insucesso da semana. O painel consolida automaticamente e mantém os dados no navegador.
+      </p>
+
+      <div id="appMessage" class="message-box" aria-live="polite"></div>
+    </section>
+
+    <section class="card control-bar offline-controls">
+      <div class="control-left">
+        <div class="field-inline">
+          <label for="baseFilter">Base</label>
+          <select id="baseFilter">
+            <option value="all">Todas</option>
+          </select>
+        </div>
+
+        <div class="field-inline">
+          <label for="dateFilter">Data</label>
+          <select id="dateFilter">
+            <option value="all">Todas</option>
+          </select>
+        </div>
+
+        <div class="field-inline">
+          <label for="reasonFilter">Motivo</label>
+          <select id="reasonFilter">
+            <option value="all">Todos</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="control-center">
+        <input type="text" id="searchInput" placeholder="Buscar base, motivo ou entregador..." />
+        <button class="search-btn" id="searchBtn">Buscar</button>
+      </div>
+    </section>
+
+    <section class="insucessos-summary-grid">
+      <article class="card summary-card insucesso-card-danger">
+        <h4>Total de Insucessos</h4>
+        <strong id="summaryTotalInsucessos">0</strong>
+      </article>
+
+      <article class="card summary-card insucesso-card-warning">
+        <h4>Total de Bases</h4>
+        <strong id="summaryBases">0</strong>
+      </article>
+
+      <article class="card summary-card insucesso-card-warning">
+        <h4>Total de Datas</h4>
+        <strong id="summaryDatas">0</strong>
+      </article>
+
+      <article class="card summary-card insucesso-card-danger">
+        <h4>Motivo Mais Frequente</h4>
+        <span class="summary-big-text" id="summaryTopReason">--</span>
+      </article>
+
+      <article class="card summary-card insucesso-card-danger">
+        <h4>Base Mais Crítica</h4>
+        <span class="summary-big-text" id="summaryTopBase">--</span>
+      </article>
+
+      <article class="card summary-card insucesso-card-danger">
+        <h4>Dia Mais Crítico</h4>
+        <span class="summary-big-text" id="summaryTopDate">--</span>
+      </article>
+
+      <article class="card summary-card insucesso-card-success">
+        <h4>Média por Base</h4>
+        <strong id="summaryAvgBase">0</strong>
+      </article>
+
+      <article class="card summary-card insucesso-card-success">
+        <h4>Média por Dia</h4>
+        <strong id="summaryAvgDate">0</strong>
+      </article>
+    </section>
+
+    <section class="insight-strip">
+      <article class="insight-box">
+        <h4>Leitura rápida</h4>
+        <p id="insightMain">Importe os arquivos da semana para começar a análise.</p>
+      </article>
+
+      <article class="insight-box">
+        <h4>Base em destaque</h4>
+        <p id="insightBase">Sem dados.</p>
+      </article>
+
+      <article class="insight-box">
+        <h4>Motivo em destaque</h4>
+        <p id="insightReason">Sem dados.</p>
+      </article>
+    </section>
+
+    <section class="overview-grid charts-overview">
+      <article class="card chart-card">
+        <div class="section-header">
+          <h3>Insucessos por base</h3>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="basesChart"></canvas>
+        </div>
+      </article>
+
+      <article class="card chart-card">
+        <div class="section-header">
+          <h3>Insucessos por data</h3>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="datesChart"></canvas>
+        </div>
+      </article>
+    </section>
+
+    <section class="overview-grid">
+      <article class="card">
+        <div class="section-header">
+          <h3>Ranking por motivo</h3>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Motivo</th>
+                <th class="t-right">Qtd</th>
+                <th class="t-right">Nível</th>
+              </tr>
+            </thead>
+            <tbody id="reasonsTable">
+              <tr><td colspan="3" class="text-soft">Sem dados</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="section-header">
+          <h3>Ranking por base</h3>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Base</th>
+                <th class="t-right">Qtd</th>
+                <th class="t-right">Nível</th>
+              </tr>
+            </thead>
+            <tbody id="basesTable">
+              <tr><td colspan="3" class="text-soft">Sem dados</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <section class="overview-grid">
+      <article class="card">
+        <div class="section-header">
+          <h3>Motoristas com mais insucessos</h3>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Motorista</th>
+                <th>Base</th>
+                <th class="t-right">Qtd</th>
+                <th class="t-right">Nível</th>
+              </tr>
+            </thead>
+            <tbody id="topDriversTable">
+              <tr><td colspan="4" class="text-soft">Sem dados</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="section-header">
+          <h3>Motoristas com menos insucessos</h3>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Motorista</th>
+                <th>Base</th>
+                <th class="t-right">Qtd</th>
+                <th class="t-right">Nível</th>
+              </tr>
+            </thead>
+            <tbody id="lowDriversTable">
+              <tr><td colspan="4" class="text-soft">Sem dados</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <section id="detailsCard" class="card details-card">
+      <div class="section-header">
+        <h3>Detalhamento dos insucessos</h3>
+
+        <div class="section-actions">
+          <span class="badge badge-neutral" id="detailsCountBadge">0 linha(s)</span>
+          <button id="toggleDetailsBtn" class="btn-secondary" type="button">Recolher</button>
+        </div>
+      </div>
+
+      <div class="details-meta" id="detailsMeta">
+        Visualizando todos os insucessos consolidados.
+      </div>
+
+      <div id="detailsContent" class="collapsible-content">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Base</th>
+                <th>Entregador</th>
+                <th>Motivo</th>
+                <th>Arquivo</th>
+                <th class="t-right">Nível</th>
+              </tr>
+            </thead>
+            <tbody id="detailsTable">
+              <tr><td colspan="6" class="text-soft">Nenhum dado importado.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script defer src="../assets/js/core/config.js"></script>
+  <script defer src="../assets/js/core/runtime.js"></script>
+  <script defer src="../assets/js/core/utils.js"></script>
+  <script defer src="../assets/js/modules/insucessos-metrics.js"></script>
+  <script defer src="../assets/js/modules/insucessos.js"></script>
+</body>
+</html>

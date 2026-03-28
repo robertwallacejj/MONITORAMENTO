@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Painel operacional local para leitura de Excel e geração de dashboards por base." />
+  <title>Dashboard | Monitoramento de Entregas SP</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script defer src="../assets/js/core/config.js"></script>
+  <script defer src="../assets/js/core/runtime.js"></script>
+  <script defer src="../assets/js/core/utils.js"></script>
+  <script defer src="../assets/js/modules/excel.js"></script>
+  <script defer src="../assets/js/modules/metrics.js"></script>
+  <script defer src="../assets/js/modules/charts.js"></script>
+  <script defer src="../assets/js/modules/dashboard.js"></script>
+  <script defer src="../assets/js/core/main.js"></script>
+</head>
+<body data-page="dashboard">
+  <header class="topbar">
+    <div class="topbar-left brand-media">
+      <img src="../assets/img/logo-monitoramento.png" alt="Logo Monitoramento" class="brand-logo-img" />
+      <div>
+        <h1 class="page-title">MONITORAMENTO</h1>
+        <div class="tabs">
+          <a href="./dashboard.html" class="tab-btn active">Dashboard</a>
+          <a href="./insucessos.html" class="tab-btn">Insucessos</a>
+          <a href="./acompanhamento-geral.html" class="tab-btn">Acompanhamento Geral</a>
+        </div>
+        <p class="page-subtitle">Leitura local de Excel e geração de dashboards operacionais</p>
+        <div class="header-quick-links"><a href="../index.html" class="btn-secondary header-home-link">Menu inicial</a></div>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <button id="clearDataBtn" class="btn-secondary btn-danger-soft" type="button">Limpar dados locais</button>
+      <button id="importBtn" class="btn-primary" type="button">Importar Excel</button>
+      <input type="file" id="excelFiles" accept=".xlsx,.xls" multiple hidden />
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero-bar">
+      <div>
+        <h2>Painel local profissional</h2>
+        <p>Importe o Excel e o sistema analisa, calcula e monta os dashboards automaticamente. Estrutura organizada para manutenção e evolução futura.</p>
+      </div>
+
+      <div class="hero-meta">
+        <div class="hero-tag" id="lastUpdateText">Última leitura: --</div>
+        <div class="hero-tag" id="storageStatus">Dados locais: vazios</div>
+        <div class="hero-tag"><strong>Modo:</strong>&nbsp;Local / Browser</div>
+      </div>
+    </section>
+
+    <section class="card import-status-card">
+      <div class="section-header">
+        <h3>Status da importação</h3>
+        <span class="badge badge-neutral" id="importPreviewBadge">Nenhum arquivo selecionado</span>
+      </div>
+
+      <p class="text-soft">Clique em <strong>Importar Excel</strong>. A leitura, validação e geração dos cards acontecem automaticamente.</p>
+      <div id="appMessage" class="message-box" aria-live="polite"></div>
+    </section>
+
+    <section class="card control-bar offline-controls">
+      <div class="control-left">
+        <div class="field-inline">
+          <label for="gridSelector">Grid</label>
+          <select id="gridSelector">
+            <option value="1">1 coluna</option>
+            <option value="2" selected>2 colunas</option>
+            <option value="3">3 colunas</option>
+            <option value="4">4 colunas</option>
+          </select>
+        </div>
+
+        <div class="field-inline">
+          <label for="regionalFilter">Regional</label>
+          <select id="regionalFilter"><option value="all">Todas</option></select>
+        </div>
+
+        <div class="field-inline">
+          <label for="statusFilter">Status</label>
+          <select id="statusFilter">
+            <option value="all">Todos</option>
+            <option value="critical">Críticas</option>
+            <option value="healthy">Acima da meta</option>
+          </select>
+        </div>
+
+        <div class="field-inline">
+          <label for="baseFilter">Base</label>
+          <select id="baseFilter"><option value="all">Todas as bases</option></select>
+        </div>
+
+        <div class="field-inline">
+          <label for="metaSlaInput">Meta SLA (%)</label>
+          <input type="number" id="metaSlaInput" min="0" max="100" step="1" value="90" />
+        </div>
+
+        <div class="field-inline">
+          <label for="btnSort">Ordenação</label>
+          <button id="btnSort" class="btn-secondary" type="button">Piores primeiro</button>
+        </div>
+      </div>
+
+      <div class="control-center">
+        <input type="text" id="searchInput" placeholder="Buscar base ou motorista..." />
+        <button class="search-btn" id="searchBtn" type="button">Buscar</button>
+      </div>
+
+      <div class="control-right control-right-wrap">
+        <div class="download-panel">
+          <button class="btn-secondary" id="downloadToggle" type="button">Baixar imagens ▾</button>
+          <div class="download-list" id="downloadList" hidden>
+            <label><input type="checkbox" id="selectAllDownloads" /> Selecionar todos</label>
+            <div id="downloadItems" class="download-items"></div>
+            <button class="btn-secondary full" id="downloadSelected" type="button">Baixar selecionados</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="dashboardsEmpty" class="empty-state">
+      <h3>Nenhum dashboard gerado ainda</h3>
+      <p>Importe um ou mais arquivos Excel para ver os cards por base.</p>
+    </section>
+
+    <section id="dashboardsContent" class="dashboards-list"></section>
+
+    <section class="general-bottom">
+      <section class="summary-grid">
+        <article class="card summary-card"><h4>Total de Bases</h4><strong id="summaryBases">0</strong></article>
+        <article class="card summary-card"><h4>Total Expedido</h4><strong id="summaryTotal">0</strong></article>
+        <article class="card summary-card"><h4>Entregues</h4><strong id="summaryDelivered">0</strong></article>
+        <article class="card summary-card"><h4>Taxa de Entrega</h4><strong id="summaryRate">0%</strong></article>
+        <article class="card summary-card"><h4>Baixa Pendente</h4><strong id="summaryPending">0</strong></article>
+        <article class="card summary-card"><h4>Insucesso</h4><strong id="summaryFailure">0</strong></article>
+      </section>
+
+      <section class="overview-grid">
+        <article class="card">
+          <div class="section-header"><h3>Desempenhos em destaque</h3></div>
+          <div class="table-scroll"><table><thead><tr><th>Motorista</th><th>Base</th><th class="t-right">Total</th><th class="t-right">SLA</th></tr></thead><tbody id="topDriversTable"><tr><td colspan="4" class="text-soft">Sem dados</td></tr></tbody></table></div>
+        </article>
+
+        <article class="card">
+          <div class="section-header"><h3>Desempenhos a desenvolver</h3></div>
+          <div class="table-scroll"><table><thead><tr><th>Motorista</th><th>Base</th><th class="t-right">Total</th><th class="t-right">SLA</th></tr></thead><tbody id="worstDriversTable"><tr><td colspan="4" class="text-soft">Sem dados</td></tr></tbody></table></div>
+        </article>
+      </section>
+
+      <section class="overview-grid charts-overview">
+        <article class="card chart-card">
+          <div class="section-header"><h3>Resumo geral</h3></div>
+          <div class="canvas-wrap"><canvas id="globalChart"></canvas></div>
+        </article>
+
+        <article class="card chart-card">
+          <div class="section-header"><h3>Ranking por base</h3></div>
+          <div class="canvas-wrap"><canvas id="basesChart"></canvas></div>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <div class="page-shell-footer">Central de monitoramento com menu inicial, dashboard, insucessos e acompanhamento geral.</div>
+</body>
+</html>

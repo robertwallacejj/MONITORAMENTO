@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Central operacional com acesso ao Dashboard, Insucessos e Acompanhamento Geral." />
+  <title>Central Operacional | Monitoramento de Entregas SP</title>
+  <link rel="stylesheet" href="./assets/css/style.css" />
+</head>
+<body class="home-body" data-page="home">
+  <header class="topbar home-topbar">
+    <div class="topbar-left brand-media">
+      <img src="./assets/img/logo-monitoramento.png" alt="Logo Monitoramento" class="brand-logo-img" />
+      <div>
+        <div class="eyebrow">Central Operacional</div>
+        <h1 class="page-title">MONITORAMENTO DE ENTREGAS SP</h1>
+        <p class="page-subtitle">Escolha o módulo que deseja usar. Estrutura profissional pronta para operação no navegador e evolução futura.</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <a href="./pages/dashboard.html" class="btn-primary">Abrir Dashboard</a>
+    </div>
+  </header>
+
+  <main class="container home-container">
+    <section class="home-hero card">
+      <div>
+        <span class="badge badge-danger">J&T Express</span>
+        <h2>Menu principal do projeto</h2>
+        <p>Esta é a página inicial de tudo. A partir daqui você entra no monitoramento por base, no painel de insucessos ou no acompanhamento geral do arquivo consolidado.</p>
+      </div>
+      <div class="hero-meta">
+        <div class="hero-tag"><strong>Ambiente:</strong>&nbsp;Vercel / Navegador</div>
+        <div class="hero-tag"><strong>Módulos:</strong>&nbsp;3 áreas principais</div>
+        <div class="hero-tag"><strong>Perfil:</strong>&nbsp;Operacional</div>
+      </div>
+    </section>
+
+    <section class="menu-grid" aria-label="Módulos principais">
+      <a class="menu-card menu-card-primary" href="./pages/dashboard.html">
+        <div class="menu-card__icon">DB</div>
+        <div class="menu-card__content">
+          <h3>Dashboard</h3>
+          <p>Importe os arquivos de monitoramento e gere cards por base, filtros, resumo geral, ranking e imagens para compartilhamento.</p>
+        </div>
+        <span class="menu-card__cta">Abrir módulo</span>
+      </a>
+
+      <a class="menu-card menu-card-warning" href="./pages/insucessos.html">
+        <div class="menu-card__icon">IN</div>
+        <div class="menu-card__content">
+          <h3>Insucessos</h3>
+          <p>Consolide relatórios da semana, filtre por base, data, motivo e entregador e acompanhe os pontos mais críticos da operação.</p>
+        </div>
+        <span class="menu-card__cta">Abrir módulo</span>
+      </a>
+
+      <a class="menu-card menu-card-danger" href="./pages/acompanhamento-geral.html">
+        <div class="menu-card__icon">AG</div>
+        <div class="menu-card__content">
+          <h3>Acompanhamento Geral</h3>
+          <p>Leia o arquivo consolidado executivo com visão rápida de SLA, piores e melhores bases, distribuição de status e regionais.</p>
+        </div>
+        <span class="menu-card__cta">Abrir módulo</span>
+      </a>
+    </section>
+
+    <section class="home-info-grid">
+      <article class="card">
+        <div class="section-header"><h3>Como navegar</h3></div>
+        <p class="text-soft">Use este menu como porta de entrada. Dentro dos módulos, as abas no topo permitem alternar entre Dashboard, Insucessos e Acompanhamento Geral.</p>
+      </article>
+      <article class="card">
+        <div class="section-header"><h3>Boas práticas</h3></div>
+        <p class="text-soft">Para evitar inconsistências no navegador, use sempre arquivos Excel válidos e limpe os dados locais quando quiser começar uma leitura nova.</p>
+      </article>
+      <article class="card">
+        <div class="section-header"><h3>Publicação</h3></div>
+        <p class="text-soft">Esta versão já está pronta para subir no GitHub e publicar no Vercel com a página inicial servindo como menu central do projeto.</p>
+      </article>
+    </section>
+  </main>
+
+  <div class="page-shell-footer">Central operacional com menu inicial e três módulos principais.</div>
+</body>
+</html>

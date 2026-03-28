@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acompanhamento Geral | Monitoramento de Entregas SP</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script defer src="../assets/js/core/config.js"></script>
+  <script defer src="../assets/js/core/runtime.js"></script>
+  <link rel="stylesheet" href="../assets/css/acompanhamento-geral.css" />
+</head>
+<body data-page="acompanhamento-geral">
+  <header class="topbar">
+    <div class="topbar-left">
+      <img src="../assets/img/logo-monitoramento.png" alt="Logo Monitoramento" class="brand-logo-img" />
+      <div>
+        <h1 class="page-title">ACOMPANHAMENTO GERAL</h1>
+        <div class="tabs">
+          <a href="./dashboard.html" class="tab-btn">Dashboard</a>
+          <a href="./insucessos.html" class="tab-btn">Insucessos</a>
+          <a href="./acompanhamento-geral.html" class="tab-btn active">Acompanhamento Geral</a>
+        </div>
+        <p class="page-subtitle">Leitura do arquivo consolidado operacional com visão executiva por base e regional</p>
+        <div class="header-quick-links"><a href="../index.html" class="btn-secondary header-home-link">Menu inicial</a></div>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <button id="agImportBtn" class="btn-primary">Importar arquivo</button>
+      <button id="agClearBtn" class="btn-secondary" type="button">Limpar dados locais</button>
+      <input type="file" id="agFileInput" accept=".xlsx,.xls" hidden />
+    </div>
+  </header>
+
+  <main class="container ag-page-grid">
+    <section class="hero-bar">
+      <div>
+        <h2>Painel executivo</h2>
+        <p>Essa tela lê o arquivo consolidado de acompanhamento geral e monta visão rápida de SLA, ranking de bases e regionais.</p>
+      </div>
+      <div class="hero-meta">
+        <div class="hero-tag" id="agFileName">Nenhum arquivo importado</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-header">
+        <h3>Status da leitura</h3>
+        <span class="badge badge-neutral">Arquivo único</span>
+      </div>
+      <p class="text-soft">Use essa página somente para o layout de planilha que contém base, expedido, assinados, não entregue, não expedido e problemático.</p>
+      <div id="agMessage" class="message-box" aria-live="polite"></div>
+    </section>
+
+    <section class="card ag-control-bar">
+      <div class="ag-control-group">
+        <div class="ag-field">
+          <label for="agBaseFilter">Base</label>
+          <select id="agBaseFilter">
+            <option value="all">Todas as bases</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="ag-summary-grid">
+      <article class="card summary-card">
+        <h4>Total Expedido</h4>
+        <strong class="ag-value" id="agTotalExpedido">0</strong>
+      </article>
+
+      <article class="card summary-card ag-card-success">
+        <h4>Pacotes Assinados</h4>
+        <strong class="ag-value" id="agAssinados">0</strong>
+      </article>
+
+      <article class="card summary-card" id="agTaxaCard">
+        <h4>Taxa de Entrega</h4>
+        <strong class="ag-value" id="agTaxa">0%</strong>
+      </article>
+
+      <article class="card summary-card ag-card-danger">
+        <h4>Não Entregue</h4>
+        <strong class="ag-value" id="agNaoEntregue">0</strong>
+      </article>
+
+      <article class="card summary-card ag-card-warning">
+        <h4>Não Expedido</h4>
+        <strong class="ag-value" id="agNaoExpedido">0</strong>
+      </article>
+
+      <article class="card summary-card ag-card-danger">
+        <h4>Problemático</h4>
+        <strong class="ag-value" id="agProblematico">0</strong>
+      </article>
+    </section>
+
+    <section class="ag-overview-grid">
+      <article class="card chart-card">
+        <div class="section-header">
+          <h3>Distribuição do status</h3>
+        </div>
+        <div class="ag-chart-wrap">
+          <canvas id="agStatusChart"></canvas>
+        </div>
+      </article>
+
+      <article class="card chart-card">
+        <div class="section-header">
+          <h3>SLA por base</h3>
+        </div>
+        <div class="ag-chart-wrap">
+          <canvas id="agBasesChart"></canvas>
+        </div>
+      </article>
+    </section>
+
+    <section class="ag-overview-grid">
+      <article class="card">
+        <div class="section-header">
+          <h3>🏆 Top 10 melhores bases</h3>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Base</th>
+                <th class="t-right">SLA</th>
+              </tr>
+            </thead>
+            <tbody id="agTopBases">
+              <tr><td colspan="2" class="text-soft">Sem dados</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="section-header">
+          <h3>⚠️ Top 10 piores bases</h3>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Base</th>
+                <th class="t-right">SLA</th>
+              </tr>
+            </thead>
+            <tbody id="agWorstBases">
+              <tr><td colspan="2" class="text-soft">Sem dados</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <section class="ag-page-grid">
+      <div class="section-header">
+        <h3>📊 Ranking por regionais</h3>
+      </div>
+
+      <section class="ag-regional-grid">
+        <article class="card">
+          <div class="section-header"><h3>Regional Claudio</h3></div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Base</th>
+                  <th class="t-right">Exp</th>
+                  <th class="t-right">Ass</th>
+                  <th class="t-right">N.Exp</th>
+                  <th class="t-right">Prob</th>
+                  <th class="t-right">SLA</th>
+                </tr>
+              </thead>
+              <tbody id="agRegionalClaudio">
+                <tr><td colspan="6" class="text-soft">Sem dados</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="section-header"><h3>Regional Rodrigo</h3></div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Base</th>
+                  <th class="t-right">Exp</th>
+                  <th class="t-right">Ass</th>
+                  <th class="t-right">N.Exp</th>
+                  <th class="t-right">Prob</th>
+                  <th class="t-right">SLA</th>
+                </tr>
+              </thead>
+              <tbody id="agRegionalRodrigo">
+                <tr><td colspan="6" class="text-soft">Sem dados</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="section-header"><h3>Regional Neto</h3></div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Base</th>
+                  <th class="t-right">Exp</th>
+                  <th class="t-right">Ass</th>
+                  <th class="t-right">N.Exp</th>
+                  <th class="t-right">Prob</th>
+                  <th class="t-right">SLA</th>
+                </tr>
+              </thead>
+              <tbody id="agRegionalNeto">
+                <tr><td colspan="6" class="text-soft">Sem dados</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="section-header"><h3>Regional Luana</h3></div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Base</th>
+                  <th class="t-right">Exp</th>
+                  <th class="t-right">Ass</th>
+                  <th class="t-right">N.Exp</th>
+                  <th class="t-right">Prob</th>
+                  <th class="t-right">SLA</th>
+                </tr>
+              </thead>
+              <tbody id="agRegionalLuana">
+                <tr><td colspan="6" class="text-soft">Sem dados</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <script defer src="../assets/js/modules/acompanhamento-geral.js"></script>
+</body>
+</html>
