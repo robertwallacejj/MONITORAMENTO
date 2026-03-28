@@ -24,7 +24,6 @@
 
   function saveLocalState() {
     U.storageSet(STORAGE_KEY, {
-      rows: state.rows,
       lastUpdate: state.lastUpdate,
       listsExpanded: state.listsExpanded
     });
@@ -32,8 +31,8 @@
 
   function loadLocalState() {
     const stored = U.storageGet(STORAGE_KEY, null);
-    if (!stored || !Array.isArray(stored.rows)) return;
-    state.rows = stored.rows;
+    if (!stored) return;
+    state.rows = [];
     state.lastUpdate = stored.lastUpdate || null;
     state.listsExpanded = Boolean(stored.listsExpanded);
   }
@@ -104,8 +103,14 @@
   function getFilteredDrivers() {
     const normalizedSearch = U.normalizar(state.filters.search || "");
     return getAllDriversData().filter(function (item) {
-      const matchesRegional = state.filters.regional === "all" || Metrics.getRegionalFromBase(item.baseOriginal || item.base) === state.filters.regional;
-      const matchesBase = state.filters.base === "all" || item.base === state.filters.base;
+      const matchesRegional =
+        state.filters.regional === "all" ||
+        Metrics.getRegionalFromBase(item.baseOriginal || item.base) === state.filters.regional;
+
+      const matchesBase =
+        state.filters.base === "all" ||
+        item.base === state.filters.base;
+
       const matchesSearch =
         !normalizedSearch ||
         U.normalizar(item.base).includes(normalizedSearch) ||
@@ -120,7 +125,9 @@
     if (!baseFilter) return;
 
     const currentValue = baseFilter.value || "all";
-    const bases = metrics.map(function (item) { return item.base; });
+    const bases = metrics.map(function (item) {
+      return item.base;
+    });
 
     baseFilter.innerHTML =
       '<option value="all">Todas as bases</option>' +
@@ -139,7 +146,9 @@
 
     const currentValue = regionalFilter.value || "all";
     const regionais = Array.from(
-      new Set(metrics.map(function (item) { return item.regional || "Não definida"; }))
+      new Set(metrics.map(function (item) {
+        return item.regional || "Não definida";
+      }))
     ).sort(function (a, b) {
       return a.localeCompare(b, "pt-BR");
     });
@@ -178,10 +187,16 @@
     U.setText("summaryBases", U.formatNumber(metrics.length));
     U.setText("summaryTotal", U.formatNumber(global.total));
     U.setText("summaryDelivered", U.formatNumber(global.entregue));
-    U.setText("summaryRate", U.formatPercent(global.total ? (global.entregue / global.total) * 100 : 0, 2));
+    U.setText(
+      "summaryRate",
+      U.formatPercent(global.total ? (global.entregue / global.total) * 100 : 0, 2)
+    );
     U.setText("summaryPending", U.formatNumber(global.naoEntregue + global.pendente));
     U.setText("summaryFailure", U.formatNumber(global.insucesso));
-    U.setText("lastUpdateText", state.lastUpdate ? ("Última leitura: " + U.formatDateTimeBR(state.lastUpdate)) : "Última leitura: --");
+    U.setText(
+      "lastUpdateText",
+      state.lastUpdate ? ("Última leitura: " + U.formatDateTimeBR(state.lastUpdate)) : "Última leitura: --"
+    );
   }
 
   function buildDriverRows(drivers) {
@@ -198,8 +213,9 @@
   }
 
   function renderDriverRankings() {
-    const drivers = getFilteredDrivers()
-      .filter(function (item) { return item.total > 0 && item.taxa < 100; });
+    const drivers = getFilteredDrivers().filter(function (item) {
+      return item.total > 0 && item.taxa < 100;
+    });
 
     const ranked = [].concat(drivers).sort(function (a, b) {
       if (b.taxa !== a.taxa) return b.taxa - a.taxa;
@@ -263,67 +279,71 @@
         '<div class="driver-section driver-section-empty-state">',
         '<div class="driver-section-title">Motoristas da base</div>',
         '<div class="driver-empty">Todos os motoristas desta base estão com 100% ou não há dados detalhados para exibir.</div>',
-        "</div>"
-      ].join("");
+        '</div>'
+      ].join('');
     }
 
     const rows = filteredDrivers
       .sort(function (a, b) {
-        if (state.filters.sort === "asc") {
+        if (state.filters.sort === 'asc') {
           if (a.taxa !== b.taxa) return a.taxa - b.taxa;
           if (b.insucesso !== a.insucesso) return b.insucesso - a.insucesso;
-          return (a.driver || "").localeCompare(b.driver || "", "pt-BR");
+          return (a.driver || '').localeCompare(b.driver || '', 'pt-BR');
         }
 
         if (b.taxa !== a.taxa) return b.taxa - a.taxa;
         if (a.insucesso !== b.insucesso) return a.insucesso - b.insucesso;
-        return (a.driver || "").localeCompare(b.driver || "", "pt-BR");
+        return (a.driver || '').localeCompare(b.driver || '', 'pt-BR');
       })
       .map(function (item) {
-        let taxaClass = "text-danger";
-        if (item.taxa >= 90) taxaClass = "text-success";
-        else if (item.taxa >= 80) taxaClass = "text-warning";
+        let taxaClass = 'text-danger';
+        if (item.taxa >= 90) taxaClass = 'text-success';
+        else if (item.taxa >= 80) taxaClass = 'text-warning';
 
         return [
-          "<tr>",
-          '<td class="driver-name-cell">' + U.escapeHtml(item.driver) + "</td>",
-          '<td class="t-right">' + U.formatNumber(item.pendente) + "</td>",
-          '<td class="t-right">' + U.formatNumber(item.entregue) + "</td>",
-          '<td class="t-right">' + U.formatNumber(item.insucesso) + "</td>",
-          '<td class="t-right">' + U.formatNumber(item.total) + "</td>",
-          '<td class="t-right ' + taxaClass + ' font-weight-bold">' + U.formatPercent(item.taxa || 0, 1) + "</td>",
-          "</tr>"
-        ].join("");
-      }).join("");
+          '<tr>',
+          '<td class="driver-name-cell">' + U.escapeHtml(item.driver) + '</td>',
+          '<td class="t-right">' + U.formatNumber(item.pendente) + '</td>',
+          '<td class="t-right">' + U.formatNumber(item.entregue) + '</td>',
+          '<td class="t-right">' + U.formatNumber(item.insucesso) + '</td>',
+          '<td class="t-right">' + U.formatNumber(item.total) + '</td>',
+          '<td class="t-right ' + taxaClass + ' font-weight-bold">' + U.formatPercent(item.taxa || 0, 1) + '</td>',
+          '</tr>'
+        ].join('');
+      })
+      .join('');
 
-    const collapsedClass = state.listsExpanded ? "" : " collapsed";
+    const collapsedClass = state.listsExpanded ? '' : ' collapsed';
+    const collapsedNote = state.listsExpanded
+      ? ''
+      : '<div class="driver-collapsed-note">Lista recolhida. Use "Expandir listas" no topo para visualizar os nomes.</div>';
 
     return [
       '<div class="driver-section' + collapsedClass + '">',
       '<div class="driver-section-header">',
       '<div class="driver-section-title">Motoristas da base</div>',
-      '<div class="driver-section-count">' + U.formatNumber(filteredDrivers.length) + " motorista(s)</div>",
-      "</div>",
+      '<div class="driver-section-count">' + U.formatNumber(filteredDrivers.length) + ' motorista(s)</div>',
+      '</div>',
       '<div class="driver-table-wrap">',
       '<table class="driver-table">',
-      "<thead>",
-      "<tr>",
-      "<th>Motorista</th>",
+      '<thead>',
+      '<tr>',
+      '<th>Motorista</th>',
       '<th class="t-right">Baixa Pendente</th>',
       '<th class="t-right">Entregue</th>',
       '<th class="t-right">Insucesso</th>',
       '<th class="t-right">Total Geral</th>',
       '<th class="t-right">Desempenho (%)</th>',
-      "</tr>",
-      "</thead>",
-      "<tbody>",
+      '</tr>',
+      '</thead>',
+      '<tbody>',
       rows,
-      "</tbody>",
-      "</table>",
-      "</div>",
-      !state.listsExpanded ? '<div class="driver-collapsed-note">Lista recolhida. Use "Expandir listas" no topo para visualizar os nomes.</div>' : "",
-      "</div>"
-    ].join("");
+      '</tbody>',
+      '</table>',
+      '</div>',
+      collapsedNote,
+      '</div>'
+    ].join('');
   }
 
   function buildBaseDashboardHtml(item, target, driversByBase) {
@@ -347,7 +367,7 @@
       '</div>',
 
       '<div class="header-center-logo">',
-      '<img src="./logo-monitoramento.png" alt="Logo Monitoramento" class="header-logo-image">',
+      '<img src="../assets/img/logo-monitoramento.png" alt="Logo Monitoramento" class="header-logo-image">',
       '</div>',
 
       '<div class="header-right">',
@@ -416,6 +436,19 @@
     populateDownloadList(filteredMetrics);
   }
 
+  async function waitForImages(root) {
+    const images = Array.from((root || document).querySelectorAll("img"));
+    if (!images.length) return;
+
+    await Promise.all(images.map(function (img) {
+      if (img.complete) return Promise.resolve();
+      return new Promise(function (resolve) {
+        img.onload = resolve;
+        img.onerror = resolve;
+      });
+    }));
+  }
+
   async function buildCardCanvas(baseName) {
     const selector = '[data-base="' + CSS.escape(baseName) + '"]';
     const node = document.querySelector(selector);
@@ -425,6 +458,8 @@
     }
 
     const body = node.querySelector("[data-capture-body='true']") || node;
+
+    await waitForImages(body);
 
     return html2canvas(body, {
       backgroundColor: "#ffffff",
@@ -532,7 +567,9 @@
       }
 
       if (invalidFiles.length) {
-        const names = invalidFiles.map(function (item) { return item.fileName; }).join(", ");
+        const names = invalidFiles.map(function (item) {
+          return item.fileName;
+        }).join(", ");
         U.showMessage("appMessage", "Há arquivo(s) com estrutura incompleta: " + names + ". Verifique as colunas obrigatórias.", "warning");
         return;
       }
@@ -652,11 +689,13 @@
     state.rows = [];
     state.lastUpdate = null;
     state.listsExpanded = false;
+
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch (error) {
       console.warn("Falha ao limpar o storage do monitoramento.", error);
     }
+
     setImportBadge("Nenhum arquivo selecionado");
     U.clearMessage("appMessage");
     renderAll();
