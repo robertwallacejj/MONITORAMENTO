@@ -56,12 +56,51 @@ const agElements = {
 };
 
 const AG_COLUMN_ALIASES = {
-  base: ["Base de entrega", "Base", "base de entrega"],
-  totalExpedido: ["número total de expedido", "numero total de expedido", "Número total de expedido"],
-  assinados: ["Número de pacotes assinados", "Numero de pacotes assinados", "Pacotes assinados"],
-  naoEntregue: ["Não entregue", "Nao entregue"],
-  naoExpedido: ["pacote não expedido", "pacote nao expedido", "Pacote não expedido", "Pacote nao expedido"],
-  problematico: ["Pacote problemático", "Pacote problematico"]
+  base: [
+    "Base de entrega",
+    "Base",
+    "base de entrega"
+  ],
+  totalExpedido: [
+    "número total de expedido",
+    "numero total de expedido",
+    "Número total de expedido",
+    "Total expedido",
+    "Expedido"
+  ],
+  assinados: [
+    "Número de pacotes assinados",
+    "Numero de pacotes assinados",
+    "Pacotes assinados",
+    "Número de entregues",
+    "Numero de entregues",
+    "Entregues",
+    "Pacotes entregues",
+    "Número de pacotes entregues",
+    "Numero de pacotes entregues"
+  ],
+  naoEntregue: [
+    "Não entregue",
+    "Nao entregue",
+    "Não entregues",
+    "Nao entregues"
+  ],
+  naoExpedido: [
+    "pacote não expedido",
+    "pacote nao expedido",
+    "Pacote não expedido",
+    "Pacote nao expedido",
+    "Não expedido",
+    "Nao expedido",
+    "Não expedidos",
+    "Nao expedidos"
+  ],
+  problematico: [
+    "Pacote problemático",
+    "Pacote problematico",
+    "Problemático",
+    "Problematico"
+  ]
 };
 
 function agNormalizeText(value) {
