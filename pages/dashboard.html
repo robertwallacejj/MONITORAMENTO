@@ -15,6 +15,7 @@
   <script defer src="../assets/js/modules/excel.js"></script>
   <script defer src="../assets/js/modules/metrics.js"></script>
   <script defer src="../assets/js/modules/charts.js"></script>
+  <script defer src="../assets/js/modules/history-store.js"></script>
   <script defer src="../assets/js/modules/dashboard.js"></script>
   <script defer src="../assets/js/core/main.js"></script>
 </head>
@@ -26,6 +27,7 @@
         <h1 class="page-title">MONITORAMENTO</h1>
         <div class="tabs">
           <a href="./dashboard.html" class="tab-btn active">Dashboard</a>
+          <a href="./relatorios.html" class="tab-btn">Relatórios</a>
           <a href="./insucessos.html" class="tab-btn">Insucessos</a>
           <a href="./acompanhamento-geral.html" class="tab-btn">Acompanhamento Geral</a>
         </div>
@@ -51,6 +53,8 @@
       <div class="hero-meta">
         <div class="hero-tag" id="lastUpdateText">Última leitura: --</div>
         <div class="hero-tag" id="storageStatus">Dados locais: vazios</div>
+        <div class="hero-tag" id="reportStoreStatus">Snapshots: 0</div>
+        <div class="hero-tag"><a href="./relatorios.html" class="inline-link-hero">Abrir relatórios</a></div>
         <div class="hero-tag"><strong>Modo:</strong>&nbsp;Local / Browser</div>
       </div>
     </section>
@@ -63,6 +67,7 @@
 
       <p class="text-soft">Clique em <strong>Importar Excel</strong>. A leitura, validação e geração dos cards acontecem automaticamente.</p>
       <div id="appMessage" class="message-box" aria-live="polite"></div>
+      <div id="importMetaInfo" class="import-meta-grid"></div>
     </section>
 
     <section class="card control-bar offline-controls">
@@ -130,6 +135,14 @@
     </section>
 
     <section id="dashboardsContent" class="dashboards-list"></section>
+
+    <section class="card smart-summary-card">
+      <div class="section-header">
+        <h3>Resumo inteligente da última importação</h3>
+        <span class="text-soft">Leitura rápida para operação</span>
+      </div>
+      <div id="smartSummary" class="smart-summary-empty">Importe um lote para gerar um resumo automático com destaques do momento.</div>
+    </section>
 
     <section class="general-bottom">
       <section class="summary-grid">

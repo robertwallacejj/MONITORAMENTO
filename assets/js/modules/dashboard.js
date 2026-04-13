@@ -5,6 +5,7 @@
   const Excel = window.CTExcel;
   const Metrics = window.CTMetrics;
   const Charts = window.CTCharts || {};
+  const Store = window.CTReportStore || null;
 
   const STORAGE_KEY = "monitoramento_local_state_v2";
 
@@ -43,6 +44,35 @@
 
   function setImportBadge(text) {
     U.setText("importPreviewBadge", text || "Nenhum arquivo selecionado");
+  }
+
+  async function updateReportStoreBadge() {
+    const target = U.byId("reportStoreStatus");
+    if (!target || !Store || typeof Store.getStats !== "function") return;
+
+    try {
+      const stats = await Store.getStats();
+      const latest = stats.latestSnapshot ? (" • Último: " + U.formatDateTimeBR(stats.latestSnapshot.savedAt)) : "";
+      target.textContent = "Snapshots: " + U.formatNumber(stats.totalSnapshots || 0) + latest;
+    } catch (error) {
+      target.textContent = "Snapshots: indisponível";
+    }
+  }
+
+  function setImportMetaInfo(preview) {
+    const box = U.byId("importMetaInfo");
+    if (!box) return;
+    if (!preview || !preview.report) {
+      box.innerHTML = "";
+      return;
+    }
+
+    box.innerHTML = [
+      '<div class="import-meta-pill"><span>Arquivos</span><strong>' + U.formatNumber(preview.report.fileCount || 0) + '</strong></div>',
+      '<div class="import-meta-pill"><span>Linhas válidas</span><strong>' + U.formatNumber(preview.report.validRows || 0) + '</strong></div>',
+      '<div class="import-meta-pill"><span>Abas válidas</span><strong>' + U.formatNumber(preview.report.validSheets || 0) + '</strong></div>',
+      '<div class="import-meta-pill"><span>Abas inválidas</span><strong>' + U.formatNumber(preview.report.invalidSheets || 0) + '</strong></div>'
+    ].join('');
   }
 
   function updateExpandAllButtonLabel() {
@@ -520,6 +550,70 @@
     }
   }
 
+
+
+  function buildOperationalSummary(metrics, global) {
+    return {
+      totalBases: metrics.length,
+      totalExpedido: global.total,
+      totalEntregue: global.entregue,
+      totalPendente: global.naoEntregue + global.pendente,
+      totalInsucesso: global.insucesso,
+      deliveryRate: global.total ? (global.entregue / global.total) * 100 : 0
+    };
+  }
+
+  function renderSmartSummary(metrics, global) {
+    const box = U.byId("smartSummary");
+    if (!box) return;
+
+    if (!metrics.length) {
+      box.className = "smart-summary-empty";
+      box.textContent = "Importe um lote para gerar um resumo automático com destaques do momento.";
+      return;
+    }
+
+    const worst = metrics.slice().sort(function (a, b) { return a.taxa - b.taxa; })[0];
+    const best = metrics.slice().sort(function (a, b) { return b.taxa - a.taxa; })[0];
+    const pendingLeader = metrics.slice().sort(function (a, b) {
+      return (b.naoEntregue + b.pendente) - (a.naoEntregue + a.pendente);
+    })[0];
+    const summary = buildOperationalSummary(metrics, global);
+
+    box.className = "smart-summary-grid";
+    box.innerHTML = [
+      '<article class="smart-summary-item"><small>Leitura geral</small><strong>' + U.formatPercent(summary.deliveryRate, 2) + '</strong><span>' + U.formatNumber(summary.totalEntregue) + ' entregues de ' + U.formatNumber(summary.totalExpedido) + '</span></article>',
+      '<article class="smart-summary-item"><small>Base com menor SLA</small><strong>' + U.escapeHtml(worst.base) + '</strong><span>' + U.formatPercent(worst.taxa, 2) + ' • ' + U.formatNumber(worst.insucesso) + ' insucessos</span></article>',
+      '<article class="smart-summary-item"><small>Base com maior SLA</small><strong>' + U.escapeHtml(best.base) + '</strong><span>' + U.formatPercent(best.taxa, 2) + ' • ' + U.formatNumber(best.entregue) + ' entregues</span></article>',
+      '<article class="smart-summary-item"><small>Maior atenção</small><strong>' + U.escapeHtml(pendingLeader.base) + '</strong><span>' + U.formatNumber((pendingLeader.naoEntregue || 0) + (pendingLeader.pendente || 0)) + ' pendências</span></article>'
+    ].join('');
+  }
+
+  function buildSnapshotPayload(preview) {
+    const baseMetrics = getBaseMetrics();
+    const global = getGlobalSummary(baseMetrics);
+    const drivers = getAllDriversData();
+
+    return {
+      savedAt: new Date().toISOString(),
+      lastUpdate: state.lastUpdate,
+      referenceDate: state.lastUpdate ? new Date(state.lastUpdate).toISOString().slice(0, 10) : "",
+      fileCount: preview && preview.report ? preview.report.fileCount : 0,
+      fileNames: preview && preview.files ? preview.files.map(function (item) { return item.fileName; }) : [],
+      rowCount: state.rows.length,
+      summary: buildOperationalSummary(baseMetrics, global),
+      baseMetrics: baseMetrics,
+      drivers: drivers
+    };
+  }
+
+  async function saveReportSnapshot(preview) {
+    if (!Store || typeof Store.saveSnapshot !== "function") return { status: "skipped" };
+    const result = await Store.saveSnapshot(buildSnapshotPayload(preview));
+    await updateReportStoreBadge();
+    return result;
+  }
+
   function renderAll() {
     const baseMetrics = getBaseMetrics();
     const filteredMetrics = getFilteredMetrics();
@@ -531,7 +625,9 @@
     renderSummary(filteredMetrics, global);
     renderDriverRankings();
     renderCharts(filteredMetrics, global);
+    renderSmartSummary(filteredMetrics, global);
     setStorageBadge();
+    updateReportStoreBadge().catch(function () {});
     updateExpandAllButtonLabel();
   }
 
@@ -583,9 +679,17 @@
 
       saveLocalState();
       renderAll();
+      setImportMetaInfo(preview);
+
+      const snapshotResult = await saveReportSnapshot(preview);
+      const snapshotMessage = snapshotResult.status === "created"
+        ? " Snapshot salvo no histórico local."
+        : snapshotResult.status === "duplicate"
+          ? " Este lote já existia no histórico e não foi duplicado."
+          : "";
 
       setImportBadge(preview.report.fileCount + " arquivo(s) processado(s)");
-      U.showMessage("appMessage", "Painel gerado com sucesso. " + preview.report.validRows + " linhas válidas processadas.", "success");
+      U.showMessage("appMessage", "Painel gerado com sucesso. " + preview.report.validRows + " linhas válidas processadas." + snapshotMessage, "success");
     } catch (error) {
       U.showMessage("appMessage", error.message || "Falha ao ler os arquivos Excel.", "error");
     } finally {
@@ -697,6 +801,7 @@
     }
 
     setImportBadge("Nenhum arquivo selecionado");
+    setImportMetaInfo(null);
     U.clearMessage("appMessage");
     renderAll();
   }
@@ -707,6 +812,7 @@
     bindActions();
     initGridSearch();
     renderAll();
+    await updateReportStoreBadge();
   }
 
   window.CTDashboard = {

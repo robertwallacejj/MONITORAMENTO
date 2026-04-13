@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Histórico local de relatórios do Dashboard com filtros por data e hora, comparação side-by-side e exportação profissional." />
+  <title>Relatórios | Monitoramento de Entregas SP</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <script defer src="../assets/js/core/config.js"></script>
+  <script defer src="../assets/js/core/runtime.js"></script>
+  <script defer src="../assets/js/core/utils.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script defer src="../assets/js/modules/history-store.js"></script>
+  <script defer src="../assets/js/modules/reports.js"></script>
+</head>
+<body data-page="relatorios">
+  <header class="topbar">
+    <div class="topbar-left brand-media">
+      <img src="../assets/img/logo-monitoramento.png" alt="Logo Monitoramento" class="brand-logo-img" />
+      <div>
+        <h1 class="page-title">RELATÓRIOS</h1>
+        <div class="tabs">
+          <a href="./dashboard.html" class="tab-btn">Dashboard</a>
+          <a href="./relatorios.html" class="tab-btn active">Relatórios</a>
+          <a href="./insucessos.html" class="tab-btn">Insucessos</a>
+          <a href="./acompanhamento-geral.html" class="tab-btn">Acompanhamento Geral</a>
+        </div>
+        <p class="page-subtitle">Histórico local com snapshots do Dashboard, comparação entre janelas de tempo e exportação em alta resolução.</p>
+        <div class="header-quick-links"><a href="../index.html" class="btn-secondary header-home-link">Menu inicial</a></div>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <button id="clearReportsBtn" class="btn-secondary btn-danger-soft" type="button">Apagar histórico</button>
+      <a href="./dashboard.html" class="btn-primary">Voltar ao Dashboard</a>
+    </div>
+  </header>
+
+  <main class="container reports-container reports-shell">
+    <section class="hero-bar reports-hero reports-hero-pro">
+      <div>
+        <span class="eyebrow">Análise histórica operacional</span>
+        <h2>Snapshots profissionais para consulta, comparação e exportação</h2>
+        <p>Filtre por data e hora, abra um snapshot salvo, compare dois períodos lado a lado e destaque automaticamente somente o que realmente mudou na operação.</p>
+      </div>
+      <div class="hero-meta">
+        <div class="hero-tag" id="reportsCountBadge">Snapshots: 0</div>
+        <div class="hero-tag" id="reportsLastBadge">Último snapshot: --</div>
+        <div class="hero-tag"><strong>Banco:</strong>&nbsp;IndexedDB local</div>
+        <div class="hero-tag"><strong>Layout:</strong>&nbsp;Desktop First / Full HD</div>
+      </div>
+    </section>
+
+    <section class="reports-toolbar-grid">
+      <article class="card report-filters-card">
+        <div class="section-header">
+          <h3>Explorar histórico</h3>
+          <span class="badge badge-neutral">Custo zero</span>
+        </div>
+
+        <div class="report-filters-grid">
+          <div class="field-inline field-stack">
+            <label for="startDateTime">Data e hora inicial</label>
+            <input type="datetime-local" id="startDateTime" />
+          </div>
+          <div class="field-inline field-stack">
+            <label for="endDateTime">Data e hora final</label>
+            <input type="datetime-local" id="endDateTime" />
+          </div>
+          <div class="field-inline field-stack">
+            <label for="reportBaseFilter">Base</label>
+            <select id="reportBaseFilter"><option value="all">Todas as bases</option></select>
+          </div>
+          <div class="field-inline field-stack">
+            <label for="reportSearch">Busca</label>
+            <input type="text" id="reportSearch" placeholder="Arquivo, data, assinatura ou lote..." />
+          </div>
+        </div>
+
+        <div class="reports-actions-row">
+          <button id="applyReportFilters" class="btn-primary" type="button">Buscar relatórios</button>
+          <button id="clearReportFilters" class="btn-secondary" type="button">Limpar filtros</button>
+          <button id="compareSelectedBtn" class="btn-secondary" type="button">Comparar selecionados</button>
+        </div>
+
+        <div id="reportsMessage" class="message-box" aria-live="polite"></div>
+      </article>
+
+      <article class="card report-window-card">
+        <div class="section-header">
+          <h3>Comparar janelas de tempo</h3>
+          <span class="text-soft">Ex.: 18:00–19:00 vs 19:00–20:00</span>
+        </div>
+
+        <div class="periods-grid">
+          <div class="period-card period-card-a">
+            <div class="period-card__title">Período A</div>
+            <div class="period-card__grid">
+              <div class="field-inline field-stack">
+                <label for="compareAStart">Início</label>
+                <input type="datetime-local" id="compareAStart" />
+              </div>
+              <div class="field-inline field-stack">
+                <label for="compareAEnd">Fim</label>
+                <input type="datetime-local" id="compareAEnd" />
+              </div>
+            </div>
+          </div>
+          <div class="period-card period-card-b">
+            <div class="period-card__title">Período B</div>
+            <div class="period-card__grid">
+              <div class="field-inline field-stack">
+                <label for="compareBStart">Início</label>
+                <input type="datetime-local" id="compareBStart" />
+              </div>
+              <div class="field-inline field-stack">
+                <label for="compareBEnd">Fim</label>
+                <input type="datetime-local" id="compareBEnd" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="window-actions-row">
+          <label class="switch-inline"><input id="compareChangedOnly" type="checkbox" checked /> Mostrar só KPIs alterados</label>
+          <button id="compareWindowsBtn" class="btn-primary" type="button">Comparar janelas</button>
+        </div>
+      </article>
+    </section>
+
+    <section class="summary-grid reports-summary-grid reports-summary-grid-main">
+      <article class="card summary-card"><h4>Total de snapshots</h4><strong id="statSnapshots">0</strong></article>
+      <article class="card summary-card"><h4>Última execução</h4><strong id="statLatestTime">--</strong></article>
+      <article class="card summary-card"><h4>Maior total expedido</h4><strong id="statMaxTotal">0</strong></article>
+      <article class="card summary-card"><h4>Bases no último snapshot</h4><strong id="statLatestBases">0</strong></article>
+      <article class="card summary-card"><h4>SLA médio filtrado</h4><strong id="statAverageSla">0%</strong></article>
+    </section>
+
+    <section class="reports-analytics-grid">
+      <article class="card reports-list-card">
+        <div class="section-header">
+          <h3>Snapshots salvos</h3>
+          <span class="text-soft">Selecione até 2 para comparar</span>
+        </div>
+        <div id="reportsEmpty" class="empty-inline-state" hidden>Nenhum snapshot encontrado para os filtros aplicados.</div>
+        <div id="reportsList" class="reports-list"></div>
+      </article>
+
+      <article class="card reports-chart-card">
+        <div class="section-header">
+          <h3>Tendência histórica</h3>
+          <div class="section-actions">
+            <button id="copyChartBtn" class="btn-secondary" type="button">Copiar imagem</button>
+            <button id="downloadChartPngBtn" class="btn-secondary" type="button">Baixar PNG</button>
+            <button id="downloadChartSvgBtn" class="btn-secondary" type="button">Baixar SVG</button>
+          </div>
+        </div>
+        <div class="chart-subtitle">Gráfico interativo com zoom, hover detalhado e séries para entregues, insucesso, pendências e SLA.</div>
+        <div id="historyChart" class="history-chart"></div>
+      </article>
+    </section>
+
+    <section class="reports-main-grid">
+      <article class="card reports-viewer-card">
+        <div class="section-header">
+          <h3>Relatório aberto</h3>
+          <div class="section-actions">
+            <button id="copyOpenReportBtn" class="btn-secondary" type="button">Copiar imagem</button>
+            <button id="downloadOpenReportBtn" class="btn-secondary" type="button">Baixar PNG</button>
+            <button id="downloadOpenReportSvgBtn" class="btn-secondary" type="button">Baixar SVG</button>
+          </div>
+        </div>
+        <div id="reportViewer" class="report-viewer-empty">Selecione um relatório para visualizar os números gerais, as bases, os motoristas e os sinais de operação.</div>
+      </article>
+
+      <article class="card comparison-card">
+        <div class="section-header">
+          <h3>Comparação side-by-side</h3>
+          <div class="section-actions">
+            <button id="copyComparisonBtn" class="btn-secondary" type="button">Copiar imagem</button>
+            <button id="downloadComparisonBtn" class="btn-secondary" type="button">Baixar PNG</button>
+            <button id="downloadComparisonSvgBtn" class="btn-secondary" type="button">Baixar SVG</button>
+          </div>
+        </div>
+        <div id="comparisonEmpty" class="report-viewer-empty">Escolha 2 snapshots ou compare 2 janelas de tempo para ver apenas as diferenças relevantes.</div>
+        <div id="comparisonResult" hidden></div>
+      </article>
+    </section>
+  </main>
+
+  <div class="page-shell-footer">Histórico local de snapshots do Dashboard com filtros por data/hora, comparação por janelas e exportação de alta resolução.</div>
+</body>
+</html>
