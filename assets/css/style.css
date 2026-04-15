@@ -2150,6 +2150,7 @@ tbody tr:hover {
   max-height: 1000px;
   opacity: 1;
   overflow: hidden;
+  min-height: 0;
 }
 
 .reports-selection-card.is-collapsed .sources-content {
@@ -2381,7 +2382,10 @@ tbody tr:hover {
 .snapshot-list {
   display: grid;
   gap: 12px;
-  padding-right: 4px;
+  padding-right: 8px;
+  max-height: 420px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .snapshot-list::-webkit-scrollbar {
