@@ -10,8 +10,7 @@
       dashboard: "./dashboard.html",
       relatorios: "./relatorios.html",
       insucessos: "./insucessos.html",
-      acompanhamentoGeral: "./acompanhamento-geral.html",
-      acareacao: "./acareacao.html"
+      acompanhamentoGeral: "./acompanhamento-geral.html"
     },
     storageKeys: {
       monitoramento: "monitoramento_local_state_v2",
@@ -23,8 +22,7 @@
       dashboard: ["XLSX", "html2canvas", "Chart"],
       insucessos: ["XLSX", "Chart"],
       "acompanhamento-geral": ["XLSX", "Chart"],
-      relatorios: [],
-      acareacao: ["html2canvas", "jspdf"]
+      relatorios: []
     }
   };
 })();

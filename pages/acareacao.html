@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Preenchimento e exportação da declaração de acareação em PDF." />
+  <title>Acareação | Monitoramento de Entregas SP</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script defer src="../assets/js/core/config.js"></script>
+  <script defer src="../assets/js/core/runtime.js"></script>
+  <script defer src="../assets/js/modules/acareacao.js"></script>
+</head>
+<body data-page="acareacao">
+  <header class="topbar">
+    <div class="topbar-left brand-media">
+      <img src="../assets/img/logo-monitoramento.png" alt="Logo Monitoramento" class="brand-logo-img" />
+      <div>
+        <h1 class="page-title">MONITORAMENTO</h1>
+        <div class="tabs">
+          <a href="./dashboard.html" class="tab-btn">Dashboard</a>
+          <a href="./relatorios.html" class="tab-btn">Relatórios</a>
+          <a href="./insucessos.html" class="tab-btn">Insucessos</a>
+          <a href="./acompanhamento-geral.html" class="tab-btn">Acompanhamento Geral</a>
+          <a href="./acareacao.html" class="tab-btn active">Acareação</a>
+        </div>
+        <p class="page-subtitle">Preencha o modelo, visualize a folha pronta e baixe em PDF no mesmo padrão operacional</p>
+        <div class="header-quick-links"><a href="../index.html" class="btn-secondary header-home-link">Menu inicial</a></div>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <button id="fillExampleBtn" class="btn-secondary" type="button">Preencher exemplo</button>
+      <button id="clearAcareacaoBtn" class="btn-secondary btn-danger-soft" type="button">Limpar</button>
+      <button id="savePdfBtn" class="btn-primary" type="button">Salvar em PDF</button>
+    </div>
+  </header>
+
+  <main class="container acareacao-layout">
+    <section class="card acareacao-form-card">
+      <div class="section-header">
+        <h3>Campos para preenchimento</h3>
+        <span class="badge badge-neutral">Os campos amarelos alimentam o documento</span>
+      </div>
+      <div id="appMessage" class="message-box" aria-live="polite"></div>
+
+      <div class="acareacao-form-grid">
+        <div class="field-inline field-block">
+          <label for="motoristaNome">Nome e sobrenome do motorista</label>
+          <input id="motoristaNome" type="text" placeholder="Ex.: Luciano Silva" />
+        </div>
+
+        <div class="field-inline field-block">
+          <label for="dataEntrega">Data da entrega do motorista</label>
+          <input id="dataEntrega" type="text" placeholder="Ex.: 20/04/2026" inputmode="numeric" />
+        </div>
+
+        <div class="field-inline field-block field-span-2">
+          <label for="enderecoEntrega">Endereço de entrega</label>
+          <input id="enderecoEntrega" type="text" placeholder="Rua, número, bairro, cidade, UF" />
+        </div>
+
+        <div class="field-inline field-block field-span-2">
+          <label for="titularCompra">Nome do titular da compra</label>
+          <input id="titularCompra" type="text" placeholder="Nome completo do titular" />
+        </div>
+
+        <div class="field-inline field-block field-span-2">
+          <label for="siteCompra">Site no qual a compra foi realizada</label>
+          <input id="siteCompra" type="text" value="Tiktok" placeholder="Ex.: shein.com / mercado livre / site próprio" />
+        </div>
+
+        <div class="field-inline field-block">
+          <label for="notaFiscal">Número da nota fiscal</label>
+          <input id="notaFiscal" type="text" placeholder="NF" />
+        </div>
+
+        <div class="field-inline field-block">
+          <label for="idPedido">ID do pedido</label>
+          <input id="idPedido" type="text" placeholder="Pedido" />
+        </div>
+
+        <div class="field-inline field-block">
+          <label for="telefoneTitular">Telefone do titular</label>
+          <input id="telefoneTitular" type="text" placeholder="(11) 99999-9999" />
+        </div>
+
+        <div class="field-inline field-block">
+          <label for="cidade">Cidade</label>
+          <input id="cidade" type="text" value="Guarulhos" />
+        </div>
+
+        <div class="field-inline field-block">
+          <label for="motivoPrincipal">Motivo principal</label>
+          <select id="motivoPrincipal">
+            <option value="contestando-remessa">Destinatário(a) está contestando o recebimento da remessa</option>
+            <option value="contestando-lacre">Destinatário(a) está contestando o recebimento dos volumes devidamente lacrados e sem sinais de violação</option>
+          </select>
+        </div>
+
+        <div class="field-inline field-block field-span-2">
+          <label for="quemRecebeu">Quem recebeu a visita do motorista?</label>
+          <div class="choice-row">
+            <label><input type="radio" name="quemRecebeu" value="destinatario" checked /> Destinatário</label>
+            <label><input type="radio" name="quemRecebeu" value="parente-funcionario" /> Parente / Funcionário</label>
+            <label><input type="radio" name="quemRecebeu" value="outros" /> Outros</label>
+          </div>
+        </div>
+
+        <div class="field-inline field-block field-span-2">
+          <label for="outrosRecebedor">Se marcou “Outros”, descreva</label>
+          <input id="outrosRecebedor" type="text" placeholder="Ex.: porteiro, vizinho, zelador" />
+        </div>
+
+        <div class="field-inline field-block">
+          <label for="recebedorNome">Nome do recebedor</label>
+          <input id="recebedorNome" type="text" placeholder="Nome de quem recebeu" />
+        </div>
+
+        <div class="field-inline field-block">
+          <label for="recebedorDocumento">Documento do recebedor</label>
+          <input id="recebedorDocumento" type="text" placeholder="RG / CPF" />
+        </div>
+
+        <div class="field-inline field-block field-span-2">
+          <label for="reconhecimento">Reconhecimento no ato da acareação</label>
+          <div class="choice-row choice-row-stacked">
+            <label><input type="radio" name="reconhecimento" value="endereco-correto" checked /> Sim, a entrega foi realizada no endereço correto</label>
+            <label><input type="radio" name="reconhecimento" value="endereco-errado" /> Sim, porém no endereço errado</label>
+            <label><input type="radio" name="reconhecimento" value="nao" /> Não</label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card acareacao-preview-card">
+      <div class="section-header">
+        <h3>Pré-visualização da folha</h3>
+        <span class="text-soft">Visual pronto para impressão em A4</span>
+      </div>
+
+      <div class="acareacao-sheet-wrap">
+        <div id="acareacaoPrintArea" class="acareacao-print-area">
+          <div class="ac-top-strip">
+            <div class="ac-top-left">
+              <div class="ac-top-driver-line">
+                <span id="previewMotoristaNome">&nbsp;</span>
+              </div>
+              <div class="ac-top-date">
+                <span id="previewDataEntrega">&nbsp;</span>
+              </div>
+            </div>
+
+            <div class="ac-top-right">
+              <div class="ac-top-address-line">
+                <span id="previewEnderecoEntrega">&nbsp;</span>
+              </div>
+            </div>
+          </div>
+
+          <article id="acareacaoSheet" class="acareacao-sheet">
+            <div class="jt-brand-sheet">
+              <div class="jt-logo-line">J&amp;T <span>EXPRESS</span></div>
+              <div class="jt-tagline">— Express Your Online Business —</div>
+            </div>
+
+            <h2 class="sheet-title">Declaração de Acareação</h2>
+
+            <section class="sheet-block">
+              <div class="sheet-block-title">Dados do consumidor</div>
+
+              <div class="sheet-row fill-row">
+                <span class="label">Nome do titular da compra:</span>
+                <span class="fill-value" id="previewTitularCompra"></span>
+              </div>
+
+              <div class="sheet-row fill-row">
+                <span class="label">Site no qual a compra foi realizada:</span>
+                <span class="fill-value" id="previewSiteCompra"></span>
+              </div>
+
+              <div class="sheet-row split-row">
+                <div class="split-item fill-row compact-row">
+                  <span class="label">Número da nota fiscal:</span>
+                  <span class="fill-value" id="previewNotaFiscal"></span>
+                </div>
+                <div class="split-item fill-row compact-row">
+                  <span class="label">ID Pedido:</span>
+                  <span class="fill-value" id="previewIdPedido"></span>
+                </div>
+              </div>
+
+              <div class="sheet-row phone-block">
+                <div class="label">As informações acima podem ser confirmadas pelo telefone do titular da compra:</div>
+                <div class="phone-line">( <span id="previewTelefoneTitular"></span> )</div>
+              </div>
+            </section>
+
+            <section class="sheet-block">
+              <div class="sheet-block-title">Motivo da Acareação</div>
+
+              <label class="sheet-checkline"><span class="sheet-checkbox" id="checkMotivoRemessa"></span> Destinatário (a) está contestando o recebimento da remessa</label>
+              <label class="sheet-checkline"><span class="sheet-checkbox" id="checkMotivoLacre"></span> Destinatário (a) está contestando o recebimento dos volumes devidamente lacrados e sem sinais de violação.</label>
+
+              <div class="sheet-row who-row">
+                <span class="label">Quem recebeu a visita do motorista?</span>
+                <label class="inline-option"><span class="sheet-checkbox" id="checkDestinatario"></span> o destinatário</label>
+                <label class="inline-option"><span class="sheet-checkbox" id="checkParente"></span> Parente / Funcionário</label>
+                <label class="inline-option"><span class="sheet-checkbox" id="checkOutros"></span> Outros</label>
+                <span class="inline-fill" id="previewOutrosRecebedor"></span>
+              </div>
+
+              <div class="sheet-row split-row split-row-wide">
+                <div class="split-item fill-row compact-row">
+                  <span class="label strong">Nome:</span>
+                  <span class="fill-value" id="previewRecebedorNome"></span>
+                </div>
+                <div class="split-item fill-row compact-row">
+                  <span class="label strong">Documento:</span>
+                  <span class="fill-value" id="previewRecebedorDocumento"></span>
+                </div>
+              </div>
+
+              <div class="sheet-row recognize-row">
+                <div class="label">O recebedor foi reconhecido no ato da acareação?</div>
+                <div class="recognize-options">
+                  <label class="inline-option"><span class="sheet-checkbox" id="checkReconhecidoCorreto"></span> Sim, a entrega foi realizada no endereço correto</label>
+                  <label class="inline-option"><span class="sheet-checkbox" id="checkReconhecidoErrado"></span> Sim, porém no endereço errado</label>
+                  <label class="inline-option"><span class="sheet-checkbox" id="checkReconhecidoNao"></span> Não</label>
+                </div>
+              </div>
+            </section>
+
+            <section class="sheet-date-sign-block">
+              <div class="date-row-main">
+                <span id="previewCidade">GUARULHOS</span>, <span id="previewDia"></span> de <span id="previewMes"></span> <span id="previewAno"></span>.
+              </div>
+            </section>
+
+            <section class="sheet-signature-block">
+              <div class="label strong">Assinatura:</div>
+              <div class="signature-space"></div>
+            </section>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="page-shell-footer">Central de monitoramento com menu inicial, dashboard, relatórios, insucessos, acompanhamento geral e acareação.</div>
+</body>
+</html>
