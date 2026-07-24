@@ -1,7 +1,7 @@
 # Monitoramento de Entregas SP — Central Operacional
 
 Versão organizada com **menu inicial** e três módulos principais:
-- Dashboard
+- Dashboar
 - Insucessos
 - Acompanhamento Geral
 
