@@ -8,13 +8,7 @@
   const state = {
     allSources: [],
     filteredSources: [],
-    selectedIds: [],
-    filters: {
-      search: "",
-      base: "all"
-    },
-    chartMetric: "sla",
-    sortMode: "worst"
+    selectedIds: []
   };
 
   function toArray(value) {
@@ -23,10 +17,6 @@
 
   function clone(value) {
     return JSON.parse(JSON.stringify(value));
-  }
-
-  function normalizeText(value) {
-    return U.normalizar ? U.normalizar(value) : String(value || "").toUpperCase();
   }
 
   function formatDate(value) {
@@ -237,25 +227,6 @@
     state.allSources = flattenSnapshotsToSources(snapshots);
     applyFilters(true);
     updateSnapshotBadges();
-  }
-
-  function sourceMatchesFilters(source) {
-    const search = normalizeText(state.filters.search || "");
-    const base = state.filters.base || "all";
-    const haystack = normalizeText([
-      source.label,
-      source.fileName,
-      source.selectedSheetName,
-      toArray(source.fileNames).join(" "),
-      formatDate(source.savedAt)
-    ].join(" "));
-    const matchesSearch = !search || haystack.includes(search) || toArray(source.baseMetrics).some(function (metric) {
-      return normalizeText(metric.base).includes(search);
-    });
-    const matchesBase = base === "all" || toArray(source.baseMetrics).some(function (metric) {
-      return metric.base === base;
-    });
-    return matchesSearch && matchesBase;
   }
 
   function applyFilters(preserveSelection) {

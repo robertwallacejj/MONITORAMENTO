@@ -390,7 +390,6 @@
 
     const baseRank = groupCount(rows, "base");
     const reasonRank = groupCount(rows, "reason");
-    const dateRank = groupCount(rows, "date");
 
     const main = "Foram encontrados " + rows.length + " insucesso(s), distribuídos em " +
       new Set(rows.map(function (item) { return item.base; })).size + " base(s) e " +
@@ -403,14 +402,6 @@
     const reason = reasonRank.length
       ? reasonRank[0].label + " apareceu " + reasonRank[0].total + " vez(es)."
       : "Sem motivo em destaque.";
-
-    if (dateRank.length) {
-      return {
-        main: main,
-        base: base,
-        reason: reason
-      };
-    }
 
     return {
       main: main,

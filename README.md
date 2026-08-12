@@ -1,14 +1,16 @@
 # Monitoramento de Entregas SP — Central Operacional
 
-Versão organizada com **menu inicial** e três módulos principais:
-- Dashboar
+Versão organizada com **menu inicial** e cinco módulos principais:
+- Dashboard
+- Relatórios
 - Insucessos
 - Acompanhamento Geral
+- Acareação
 
 ## Estrutura
 
 ```text
-monitoramento-suite-menu-profissional/
+Monitoramento-main/
 ├── assets/
 │   ├── css/
 │   │   ├── style.css
@@ -17,13 +19,32 @@ monitoramento-suite-menu-profissional/
 │   ├── img/
 │   └── js/
 │       ├── core/
+│       │   ├── config.js
+│       │   ├── runtime.js
+│       │   ├── utils.js
+│       │   └── main.js
 │       └── modules/
+│           ├── excel.js
+│           ├── metrics.js
+│           ├── charts.js
+│           ├── dashboard.js
+│           ├── history-store.js
+│           ├── reports.js
+│           ├── insucessos-metrics.js
+│           ├── insucessos.js
+│           ├── acompanhamento-geral.js
+│           └── acareacao.js
 ├── docs/
+│   └── arquitetura.md
 ├── pages/
 │   ├── dashboard.html
+│   ├── relatorios.html
 │   ├── insucessos.html
-│   └── acompanhamento-geral.html
+│   ├── acompanhamento-geral.html
+│   └── acareacao.html
 ├── tools/
+│   ├── start-local-server.bat
+│   └── start-local-server.ps1
 ├── index.html
 └── README.md
 ```
@@ -32,8 +53,10 @@ monitoramento-suite-menu-profissional/
 
 - `index.html`: menu inicial do projeto.
 - `pages/dashboard.html`: monitoramento principal por base.
+- `pages/relatorios.html`: histórico de snapshots do Dashboard, com comparação entre períodos.
 - `pages/insucessos.html`: consolidação de insucessos.
 - `pages/acompanhamento-geral.html`: leitura do arquivo executivo único.
+- `pages/acareacao.html`: preenchimento e exportação em PDF da declaração de acareação.
 
 ## Como publicar no Vercel
 
@@ -44,6 +67,7 @@ monitoramento-suite-menu-profissional/
 
 ## Observações
 
-- O projeto continua usando CDN para `XLSX`, `Chart.js` e `html2canvas`.
+- O projeto continua usando CDN para `XLSX`, `Chart.js`, `html2canvas`, `jsPDF` e `Plotly` (este último só em Relatórios).
 - Para evitar problemas de navegador ao testar localmente, prefira o servidor local em `tools/`.
 - As páginas internas têm botão de **Menu inicial** para retorno rápido.
+- O histórico de Relatórios é salvo no navegador via **IndexedDB** (`history-store.js`); os demais módulos usam `localStorage` para o estado local.

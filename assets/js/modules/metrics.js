@@ -146,8 +146,7 @@
       };
     }
 
-    const hasExplicitColumnM = hasM || isFilledValue(getColumnValue(row, 12, ["M", "Coluna M"]));
-    if (hasExplicitColumnM) {
+    if (hasM) {
       return {
         status: "pendente",
         deliveredTime: "",

@@ -283,8 +283,7 @@
       };
     }
 
-    const hasExplicitColumnM = hasM || isFilledValue(getColumnValue(rawRow, 12, COLUMN_GROUPS.columnM));
-    if (hasExplicitColumnM) {
+    if (hasM) {
       return {
         status: "pendente",
         deliveredTime: "",
@@ -488,12 +487,16 @@
       acc.validRows += item.normalizedRows.length;
       acc.invalidRows += item.invalidRows.length;
       acc.ignoredSheets += item.ignoredSheets;
+      if (item.validation.isUsable) acc.validSheets += 1;
+      else acc.invalidSheets += 1;
       return acc;
     }, {
       fileCount: 0,
       validRows: 0,
       invalidRows: 0,
-      ignoredSheets: 0
+      ignoredSheets: 0,
+      validSheets: 0,
+      invalidSheets: 0
     });
 
     return {

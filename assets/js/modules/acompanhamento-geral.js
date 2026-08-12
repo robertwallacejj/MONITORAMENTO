@@ -126,6 +126,10 @@ function agFormatNumber(value) {
   return Number(value || 0).toLocaleString("pt-BR");
 }
 
+function agEscapeHtml(value) {
+  return window.CTUtils ? window.CTUtils.escapeHtml(value) : String(value || "");
+}
+
 function agFindColumnName(row, aliases) {
   const keys = Object.keys(row || {});
   const normalizedMap = new Map(keys.map((key) => [agNormalizeText(key), key]));
@@ -316,7 +320,7 @@ function agRenderRankingTable(target, rows, emptyText = "Sem dados") {
 
   target.innerHTML = rows.map((item) => `
     <tr>
-      <td>${item.base}</td>
+      <td>${agEscapeHtml(item.base)}</td>
       <td class="t-right"><strong>${item.taxa.toFixed(2)}%</strong></td>
     </tr>
   `).join("");
@@ -341,7 +345,7 @@ function agRenderRegionalTable(target, baseList) {
     const badgeClass = row.taxa >= 90 ? "ag-badge-success" : row.taxa >= 80 ? "ag-badge-warning" : "ag-badge-danger";
     return `
       <tr>
-        <td>${row.base}</td>
+        <td>${agEscapeHtml(row.base)}</td>
         <td class="t-right">${agFormatNumber(row.totalExpedido)}</td>
         <td class="t-right">${agFormatNumber(row.assinados)}</td>
         <td class="t-right">${agFormatNumber(row.naoExpedido)}</td>
