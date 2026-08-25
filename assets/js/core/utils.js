@@ -34,7 +34,8 @@
 
   function formatPercent(value, digits) {
     const num = Number(value || 0);
-    return `${num.toFixed(digits ?? 2)}%`;
+    const decimals = digits === null || digits === undefined ? 2 : digits;
+    return `${num.toFixed(decimals)}%`;
   }
 
   function formatDateTimeBR(value) {
@@ -147,7 +148,34 @@
     const link = document.createElement("a");
     link.href = url;
     link.download = filename;
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
+  }
+
+  function downloadCanvasPNG(canvas, filename) {
+    return new Promise(function (resolve) {
+      if (!canvas || typeof canvas.toBlob !== "function") {
+        downloadBlobURL(canvas.toDataURL("image/png"), filename);
+        resolve();
+        return;
+      }
+
+      canvas.toBlob(function (blob) {
+        if (!blob) {
+          downloadBlobURL(canvas.toDataURL("image/png"), filename);
+          resolve();
+          return;
+        }
+
+        const objectUrl = URL.createObjectURL(blob);
+        downloadBlobURL(objectUrl, filename);
+        setTimeout(function () {
+          URL.revokeObjectURL(objectUrl);
+        }, 4000);
+        resolve();
+      }, "image/png");
+    });
   }
 
   window.CTUtils = {
@@ -172,6 +200,7 @@
     clearMessage,
     storageSet,
     storageGet,
-    downloadBlobURL
+    downloadBlobURL,
+    downloadCanvasPNG
   };
 })();

@@ -212,7 +212,7 @@ function agRestoreState() {
     agElements.baseFilter.value = agState.selectedBase;
     agRender();
     agShowMessage("Dados restaurados do navegador.", "success");
-  } catch {
+  } catch (error) {
     localStorage.removeItem(AG_STORAGE_KEY);
   }
 }
@@ -470,7 +470,10 @@ function agClearData() {
 
 function agBindEvents() {
   agElements.importBtn.addEventListener("click", () => agElements.fileInput.click());
-  agElements.fileInput.addEventListener("change", (event) => agHandleFile(event.target.files?.[0]));
+  agElements.fileInput.addEventListener("change", (event) => {
+    const files = event.target.files;
+    agHandleFile(files && files.length ? files[0] : null);
+  });
   agElements.clearBtn.addEventListener("click", agClearData);
   agElements.baseFilter.addEventListener("change", (event) => {
     agState.selectedBase = event.target.value;

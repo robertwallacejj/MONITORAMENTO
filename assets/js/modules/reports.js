@@ -778,40 +778,38 @@
   async function exportElementAsPng(targetId, filename) {
     const canvas = await captureElement(targetId, 2);
     if (!canvas) return;
-    const url = canvas.toDataURL("image/png");
-    U.downloadBlobURL(url, filename || "relatorio.png");
+    await U.downloadCanvasPNG(canvas, filename || "relatorio.png");
   }
 
   async function exportElementAs4kPng(targetId, filename) {
     showMessage("Gerando relatório em alta resolução... Aguarde.", "info");
     const canvas = await captureElement(targetId, 3);
     if (!canvas) return;
-    const url = canvas.toDataURL("image/png");
-    U.downloadBlobURL(url, filename || "relatorio-4k.png");
+    await U.downloadCanvasPNG(canvas, filename || "relatorio-4k.png");
     showMessage("Relatório completo baixado com sucesso.", "success");
   }
 
   async function copyElementAsImage(targetId) {
     if (!navigator.clipboard || !window.ClipboardItem) return;
     showMessage("Preparando imagem completa para cópia... Aguarde.", "info");
-    const canvas = await captureElement(targetId, 2);
-    if (!canvas) return;
-    return new Promise(function (resolve, reject) {
-      canvas.toBlob(async function (blob) {
-        if (!blob) {
-          reject(new Error('Falha ao gerar imagem.'));
-          return;
-        }
-        try {
-          await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
-          showMessage("Relatório copiado para a área de transferência.", "success");
-          resolve();
-        } catch (error) {
-          showMessage("Falha ao copiar. Tente a opção de download.", "error");
-          reject(error);
-        }
+
+    const blobPromise = captureElement(targetId, 2).then(function (canvas) {
+      if (!canvas) throw new Error("Falha ao gerar imagem.");
+      return new Promise(function (resolve, reject) {
+        canvas.toBlob(function (blob) {
+          if (!blob) reject(new Error("Falha ao gerar imagem."));
+          else resolve(blob);
+        }, "image/png");
       });
     });
+
+    try {
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": blobPromise })]);
+      showMessage("Relatório copiado para a área de transferência.", "success");
+    } catch (error) {
+      showMessage("Falha ao copiar. Tente a opção de download.", "error");
+      throw error;
+    }
   }
 
   function bindEvents() {

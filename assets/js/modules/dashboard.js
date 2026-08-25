@@ -500,7 +500,7 @@
 
   async function downloadReportPNG(baseName) {
     const canvas = await buildCardCanvas(baseName);
-    U.downloadBlobURL(canvas.toDataURL("image/png"), U.sanitizeFilename(baseName) + ".png");
+    await U.downloadCanvasPNG(canvas, U.sanitizeFilename(baseName) + ".png");
   }
 
   async function copyReportPNG(baseName, button) {
@@ -510,15 +510,16 @@
     }
 
     const originalText = button ? button.textContent : "";
-    const canvas = await buildCardCanvas(baseName);
 
     try {
-      const blob = await new Promise(function (resolve) {
-        canvas.toBlob(resolve, "image/png");
+      const blobPromise = buildCardCanvas(baseName).then(function (canvas) {
+        return new Promise(function (resolve) {
+          canvas.toBlob(resolve, "image/png");
+        });
       });
 
       await navigator.clipboard.write([
-        new ClipboardItem({ "image/png": blob })
+        new ClipboardItem({ "image/png": blobPromise })
       ]);
 
       if (button) button.textContent = "Imagem copiada";
