@@ -3508,6 +3508,89 @@ tbody tr:hover {
   color: var(--red-dark);
 }
 
+/* ===================================================================
+   Tradução híbrida PT / 中文
+   =================================================================== */
+.i18n-hybrid-btn {
+  white-space: normal;
+  max-width: 210px;
+  min-height: 0;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  font-size: 11.5px;
+  line-height: 1.22;
+  text-align: left;
+}
+
+.i18n-hybrid-btn.is-active {
+  background: var(--red);
+  border-color: var(--red-dark);
+  color: #fff;
+}
+
+.i18n-hybrid-btn.is-busy {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+ruby.i18n-pair {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  line-height: 1.12;
+  text-align: center;
+  max-width: 100%;
+}
+
+ruby.i18n-pair > rt.i18n-pt {
+  display: block;
+  margin-top: 1px;
+  font-size: 0.66em;
+  line-height: 1.1;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: normal;
+  color: var(--text-muted);
+  opacity: 0.72;
+}
+
+/* Em áreas compactas o português-guia fica ainda menor */
+.tabs ruby.i18n-pair > rt.i18n-pt,
+.tab-btn ruby.i18n-pair > rt.i18n-pt,
+.menu-card__cta ruby.i18n-pair > rt.i18n-pt,
+th ruby.i18n-pair > rt.i18n-pt,
+.badge ruby.i18n-pair > rt.i18n-pt {
+  font-size: 0.58em;
+  opacity: 0.62;
+}
+
+.i18n-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translate(-50%, 16px);
+  z-index: 9999;
+  max-width: min(90vw, 420px);
+  padding: 12px 18px;
+  border-radius: var(--radius-sm);
+  background: #172033;
+  color: #fff;
+  font-size: 13px;
+  line-height: 1.4;
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  transition: opacity .28s ease, transform .28s ease;
+  pointer-events: none;
+}
+
+.i18n-toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
 #comparisonResult[hidden] {
   display: none !important;
 }
