@@ -295,7 +295,7 @@
       const level = Metrics.getSeverityByValue(item.total, 2, 5);
       return [
         "<tr>",
-        '<td class="rank-name">' + U.escapeHtml(item.driver) + "</td>",
+        '<td class="rank-name" data-no-i18n>' + U.escapeHtml(item.driver) + "</td>",
         "<td>" + U.escapeHtml(item.base) + "</td>",
         '<td class="t-right">' + U.formatNumber(item.total) + "</td>",
         '<td class="t-right">' + getBadgeHtml(level) + "</td>",
@@ -307,7 +307,7 @@
       const level = Metrics.getSeverityByValue(item.total, 2, 5);
       return [
         "<tr>",
-        '<td class="rank-name">' + U.escapeHtml(item.driver) + "</td>",
+        '<td class="rank-name" data-no-i18n>' + U.escapeHtml(item.driver) + "</td>",
         "<td>" + U.escapeHtml(item.base) + "</td>",
         '<td class="t-right">' + U.formatNumber(item.total) + "</td>",
         '<td class="t-right">' + getBadgeHtml(level === "danger" ? "warning" : "success") + "</td>",
@@ -351,9 +351,9 @@
         "<tr>",
         "<td>" + U.escapeHtml(item.date) + "</td>",
         "<td>" + U.escapeHtml(item.base) + "</td>",
-        "<td>" + U.escapeHtml(item.driver) + "</td>",
+        '<td data-no-i18n>' + U.escapeHtml(item.driver) + "</td>",
         '<td class="reason-cell">' + U.escapeHtml(item.reason) + "</td>",
-        "<td>" + U.escapeHtml(item.fileName) + "</td>",
+        '<td data-no-i18n>' + U.escapeHtml(item.fileName) + "</td>",
         '<td class="t-right">' + getBadgeHtml(level) + "</td>",
         "</tr>"
       ].join("");

@@ -2,176 +2,13 @@
   "use strict";
 
   const U = window.CTUtils;
+  const D = window.CTDomain;
 
-  const COLUMN_GROUPS = {
-    base: ["Base de entrega", "Base", "base"],
-    driver: ["Entregador", "Motorista", "Courier", "Driver", "driver"],
-    regional: ["Regional", "regional"],
-
-    total: [
-      "Número total de expedido",
-      "Numero total de expedido",
-      "Total Expedido",
-      "EXPEDIDO",
-      "Expedido",
-      "total"
-    ],
-    signed: [
-      "Número de pacotes assinados",
-      "Numero de pacotes assinados",
-      "Pacotes assinados",
-      "Entregues",
-      "ENTREGUE",
-      "Entregue",
-      "delivered"
-    ],
-    undelivered: [
-      "Não entregue",
-      "Nao entregue",
-      "BAIXA PENDENTE",
-      "Baixa pendente",
-      "Baixa Pendente",
-      "undelivered"
-    ],
-    problematic: [
-      "Pacote problemático",
-      "Pacote problematico",
-      "Problemático",
-      "Problematico",
-      "INSUCESSO",
-      "Insucesso",
-      "problematic"
-    ],
-    pending: [
-      "Pacote não expedido",
-      "Pacote nao expedido",
-      "Não expedido",
-      "Nao expedido",
-      "Pendente",
-      "pending"
-    ],
-
-    columnH: ["H", "Coluna H", "Status H", "Motivo H", "Ocorrência H", "Ocorrencia H"],
-    columnI: ["I", "Coluna I", "Status I", "Motivo I", "Ocorrência I", "Ocorrencia I"],
-    columnJ: ["J", "Coluna J", "Data Baixa", "Baixa", "Comprovante", "Entrega", "Data Entrega"],
-    columnM: ["M", "Coluna M", "Status M", "Motivo M", "Ocorrência M", "Ocorrencia M"],
-
-    deliveredTime: ["Horário da entrega", "Horario da entrega", "deliveredTime"],
-    problemReason: [
-      "Motivos dos pacotes problemáticos",
-      "Motivos dos pacotes problematicos",
-      "Pacote problemático",
-      "Pacote problematico",
-      "problemReason"
-    ]
-  };
-
-  const ALLOWED_INSUCESSO_REASONS = [
-    "Endereço incorreto",
-    "Ausência do destinatário",
-    "Recusa de recebimento pelo cliente (destinatário)",
-    "Impossibilidade de chegar no endereço informado",
-    "Destinatário mudou de endereço"
-  ];
-
-  function getField(row, keys) {
-    if (!row || typeof row !== "object") return null;
-
-    const keyList = Array.isArray(keys) ? keys : [keys];
-
-    for (let i = 0; i < keyList.length; i += 1) {
-      if (Object.prototype.hasOwnProperty.call(row, keyList[i])) {
-        return row[keyList[i]];
-      }
-    }
-
-    const normalizedTargets = keyList.map(function (item) {
-      return U.normalizar(String(item || ""));
-    });
-
-    const rowKeys = Object.keys(row);
-
-    for (let i = 0; i < rowKeys.length; i += 1) {
-      const key = rowKeys[i];
-      if (normalizedTargets.includes(U.normalizar(String(key || "")))) {
-        return row[key];
-      }
-    }
-
-    return null;
-  }
-
-  function getFieldByColumnIndex(row, index) {
-    if (!row) return null;
-
-    if (Array.isArray(row)) {
-      return row[index];
-    }
-
-    if (typeof row === "object") {
-      if (Object.prototype.hasOwnProperty.call(row, index)) return row[index];
-      if (Object.prototype.hasOwnProperty.call(row, String(index))) return row[String(index)];
-
-      const values = Object.values(row);
-      if (index >= 0 && index < values.length) {
-        return values[index];
-      }
-    }
-
-    return null;
-  }
-
-  function getColumnValue(row, index, aliases) {
-    const byIndex = getFieldByColumnIndex(row, index);
-    if (byIndex !== null && byIndex !== undefined && byIndex !== "") return byIndex;
-
-    const byAlias = getField(row, aliases);
-    if (byAlias !== null && byAlias !== undefined) return byAlias;
-
-    return "";
-  }
-
-  function isFilledValue(value) {
-    if (value === null || value === undefined) return false;
-    if (typeof value === "number") return !Number.isNaN(value);
-    if (typeof value === "boolean") return value === true;
-
-    const text = String(value).trim();
-    if (!text) return false;
-
-    const normalized = U.normalizar(text);
-    const emptyTokens = ["SEMVALOR", "NULL", "UNDEFINED", "NA", "N/A", "-"];
-
-    return !emptyTokens.includes(normalized);
-  }
-
-  function normalizeReasonText(value) {
-    if (value === null || value === undefined) return "";
-
-    let text = String(value).trim();
-    if (!text) return "";
-
-    const hyphenIndex = text.indexOf("-");
-    if (hyphenIndex >= 0) {
-      text = text.slice(hyphenIndex + 1);
-    }
-
-    text = text
-      .replace(/[._]+/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-
-    return U.normalizar(text);
-  }
-
-  function isAllowedInsucessoReason(value) {
-    const normalizedValue = normalizeReasonText(value);
-    if (!normalizedValue) return false;
-
-    return ALLOWED_INSUCESSO_REASONS.some(function (reason) {
-      return normalizedValue.includes(U.normalizar(reason));
-    });
-  }
+  const COLUMN_GROUPS = D.COLUMN_GROUPS;
+  const getField = D.getField;
+  const getFieldByColumnIndex = D.getFieldByColumnIndex;
+  const getColumnValue = D.getColumnValue;
+  const isFilledValue = D.isFilledValue;
 
   function hasAnyColumn(headers, aliases) {
     const normalizedHeaders = headers.map(function (item) {
@@ -255,84 +92,6 @@
     };
   }
 
-  function classifyDetailedRow(rawRow) {
-    const valueH = getColumnValue(rawRow, 7, COLUMN_GROUPS.columnH);
-    const valueI = getColumnValue(rawRow, 8, COLUMN_GROUPS.columnI);
-    const valueJ = getColumnValue(rawRow, 9, COLUMN_GROUPS.columnJ);
-    const valueM = getColumnValue(rawRow, 12, COLUMN_GROUPS.columnM);
-
-    const hasH = isFilledValue(valueH);
-    const hasI = isFilledValue(valueI);
-    const hasJ = isFilledValue(valueJ);
-    const hasM = isFilledValue(valueM);
-    const allowedM = hasM && isAllowedInsucessoReason(valueM);
-
-    if (hasJ) {
-      return {
-        status: "entregue",
-        deliveredTime: String(valueJ || "").trim(),
-        problemReason: ""
-      };
-    }
-
-    if (hasM && allowedM) {
-      return {
-        status: "insucesso",
-        deliveredTime: "",
-        problemReason: String(valueM || "").trim()
-      };
-    }
-
-    if (hasM) {
-      return {
-        status: "pendente",
-        deliveredTime: "",
-        problemReason: ""
-      };
-    }
-
-    if (hasH || hasI) {
-      return {
-        status: "insucesso",
-        deliveredTime: "",
-        problemReason: String(valueH || valueI || "").trim()
-      };
-    }
-
-    return {
-      status: "pendente",
-      deliveredTime: "",
-      problemReason: ""
-    };
-  }
-
-  function classifyLegacyDetailedRow(rawRow) {
-    const deliveredTime = getField(rawRow, COLUMN_GROUPS.deliveredTime);
-    const problemReason = getField(rawRow, COLUMN_GROUPS.problemReason);
-
-    if (isFilledValue(deliveredTime)) {
-      return {
-        status: "entregue",
-        deliveredTime: String(deliveredTime || "").trim(),
-        problemReason: ""
-      };
-    }
-
-    if (isFilledValue(problemReason)) {
-      return {
-        status: "insucesso",
-        deliveredTime: "",
-        problemReason: String(problemReason || "").trim()
-      };
-    }
-
-    return {
-      status: "pendente",
-      deliveredTime: "",
-      problemReason: ""
-    };
-  }
-
   function classifyRow(rawRow) {
     const base = String(getField(rawRow, COLUMN_GROUPS.base) || "BASE INDEFINIDA").trim();
     const driver = String(getField(rawRow, COLUMN_GROUPS.driver) || "NÃO ATRIBUÍDO").trim();
@@ -365,15 +124,7 @@
       };
     }
 
-    const byColumns = classifyDetailedRow(rawRow);
-    const hasColumnSignals =
-      byColumns.status !== "pendente" ||
-      isFilledValue(getColumnValue(rawRow, 7, COLUMN_GROUPS.columnH)) ||
-      isFilledValue(getColumnValue(rawRow, 8, COLUMN_GROUPS.columnI)) ||
-      isFilledValue(getColumnValue(rawRow, 9, COLUMN_GROUPS.columnJ)) ||
-      isFilledValue(getColumnValue(rawRow, 12, COLUMN_GROUPS.columnM));
-
-    const detailed = hasColumnSignals ? byColumns : classifyLegacyDetailedRow(rawRow);
+    const detailed = D.classifyRowStatus(rawRow);
 
     const isValid = Boolean(base && base !== "BASE INDEFINIDA") &&
       (driver !== "NÃO ATRIBUÍDO" || detailed.status !== "pendente");

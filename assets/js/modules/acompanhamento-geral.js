@@ -3,7 +3,7 @@
 
 const AG_STORAGE_KEY = "acompanhamentoGeralState.v1";
 
-const AG_REGIONAIS = {
+const AG_REGIONAIS = (window.CTDomain && window.CTDomain.REGIONAIS) || {
   claudio: [
     "S-CRDR-SP","GRU-SP","S-CSVD-SP","S-BRFD-SP","S-FREG-SP","F GRU-SP",
     "S-BRAS-SP","F S-JRG-SP","F S-VLMR-SP","GRU 03-SP","S-VLGUI-SP",
@@ -141,14 +141,7 @@ function agFindColumnName(row, aliases) {
 }
 
 function agToNumber(value) {
-  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
-  const cleaned = String(value || "")
-    .replace(/\./g, "")
-    .replace(/,/g, ".")
-    .replace(/[^0-9.-]/g, "")
-    .trim();
-  const parsed = Number(cleaned);
-  return Number.isFinite(parsed) ? parsed : 0;
+  return window.CTUtils ? window.CTUtils.toNumber(value) : Number(value) || 0;
 }
 
 function agShowMessage(text, type = "neutral") {
@@ -193,11 +186,22 @@ function agBuildNormalizedRows(rawRows) {
 }
 
 function agSaveState() {
-  localStorage.setItem(AG_STORAGE_KEY, JSON.stringify({
+  const payload = {
     rows: agState.rows,
     workbookName: agState.workbookName,
     selectedBase: agState.selectedBase
-  }));
+  };
+
+  if (window.CTUtils) {
+    window.CTUtils.storageSet(AG_STORAGE_KEY, payload);
+    return;
+  }
+
+  try {
+    localStorage.setItem(AG_STORAGE_KEY, JSON.stringify(payload));
+  } catch (error) {
+    console.warn("Falha ao salvar no localStorage.", error);
+  }
 }
 
 function agRestoreState() {

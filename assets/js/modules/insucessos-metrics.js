@@ -2,10 +2,11 @@
   "use strict";
 
   const U = window.CTUtils;
+  const D = window.CTDomain;
 
   const COLUMN_GROUPS = {
-    base: ["Base de entrega", "Base", "base"],
-    driver: ["Entregador", "Motorista", "Courier", "Driver", "driver"],
+    base: D.COLUMN_GROUPS.base,
+    driver: D.COLUMN_GROUPS.driver,
     date: [
       "Data",
       "Data de baixa",
@@ -16,93 +17,15 @@
       "Data do relatorio",
       "Dia",
       "date"
-    ],
-    reason: [
-      "Motivos dos pacotes problemáticos",
-      "Motivos dos pacotes problematicos",
-      "Pacote problemático",
-      "Pacote problematico",
-      "Motivo",
-      "Motivo do insucesso",
-      "Insucesso",
-      "problemReason",
-      "M",
-      "Coluna M",
-      "Status M",
-      "Motivo M",
-      "Ocorrência M",
-      "Ocorrencia M",
-      "H",
-      "Coluna H",
-      "Status H",
-      "Motivo H",
-      "Ocorrência H",
-      "Ocorrencia H",
-      "I",
-      "Coluna I",
-      "Status I",
-      "Motivo I",
-      "Ocorrência I",
-      "Ocorrencia I"
     ]
   };
 
   const STORAGE_DATE_REGEX = /\b(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?\b/;
 
-  function getField(row, aliases) {
-    if (!row || typeof row !== "object") return "";
-
-    const keys = Array.isArray(aliases) ? aliases : [aliases];
-
-    for (let i = 0; i < keys.length; i += 1) {
-      const key = keys[i];
-      if (Object.prototype.hasOwnProperty.call(row, key)) {
-        return row[key];
-      }
-    }
-
-    const normalizedAliases = keys.map(function (item) {
-      return U.normalizar(String(item || ""));
-    });
-
-    const rowKeys = Object.keys(row);
-    for (let i = 0; i < rowKeys.length; i += 1) {
-      const key = rowKeys[i];
-      if (normalizedAliases.includes(U.normalizar(key))) {
-        return row[key];
-      }
-    }
-
-    return "";
-  }
-
-  function isFilled(value) {
-    if (value === null || value === undefined) return false;
-    if (typeof value === "number") return !Number.isNaN(value);
-    return String(value).trim() !== "";
-  }
-
-  function cleanReason(value) {
-    if (!isFilled(value)) return "";
-
-    let text = String(value).trim();
-
-    const hyphenIndex = text.indexOf("-");
-    if (hyphenIndex >= 0) {
-      text = text.slice(hyphenIndex + 1);
-    }
-
-    text = text
-      .replace(/[._]+/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-
-    return text;
-  }
-
-  function normalizeReasonKey(value) {
-    return U.normalizar(cleanReason(value));
-  }
+  const getField = D.getField;
+  const isFilled = D.isFilledValue;
+  const cleanReason = D.cleanReasonText;
+  const normalizeReasonKey = D.normalizeReasonKey;
 
   function parseExcelDate(value) {
     if (!isFilled(value)) return "";
@@ -171,56 +94,18 @@
     return getDateFromFileName(fileName);
   }
 
-  function extractReason(row) {
-    const direct = getField(row, [
-      "Motivos dos pacotes problemáticos",
-      "Motivos dos pacotes problematicos",
-      "Pacote problemático",
-      "Pacote problematico",
-      "Motivo",
-      "Motivo do insucesso",
-      "Insucesso",
-      "problemReason"
-    ]);
-
-    if (isFilled(direct)) return cleanReason(direct);
-
-    const m = getField(row, ["M", "Coluna M", "Status M", "Motivo M", "Ocorrência M", "Ocorrencia M"]);
-    if (isFilled(m)) return cleanReason(m);
-
-    const h = getField(row, ["H", "Coluna H", "Status H", "Motivo H", "Ocorrência H", "Ocorrencia H"]);
-    if (isFilled(h)) return cleanReason(h);
-
-    const i = getField(row, ["I", "Coluna I", "Status I", "Motivo I", "Ocorrência I", "Ocorrencia I"]);
-    if (isFilled(i)) return cleanReason(i);
-
-    return "";
+  // Usa a mesma classificação do Dashboard (CTDomain.classifyRowStatus)
+  // para que os dois módulos contem exatamente os mesmos insucessos a
+  // partir do mesmo arquivo.
+  function classifyInsucessoRow(row) {
+    const detailed = D.classifyRowStatus(row);
+    if (detailed.status !== "insucesso") return { isInsucesso: false, reason: "" };
+    return { isInsucesso: true, reason: cleanReason(detailed.problemReason) };
   }
 
-  function isInsucessoRow(row) {
-    const reason = extractReason(row);
-    if (!reason) return false;
-
-    const deliveredTime = getField(row, [
-      "Horário da entrega",
-      "Horario da entrega",
-      "J",
-      "Coluna J",
-      "Data Baixa",
-      "Baixa",
-      "Entrega",
-      "Data Entrega"
-    ]);
-
-    if (isFilled(deliveredTime)) return false;
-
-    return true;
-  }
-
-  function normalizeRow(row, fileName) {
+  function normalizeRow(row, fileName, reason) {
     const base = String(getField(row, COLUMN_GROUPS.base) || "BASE INDEFINIDA").trim();
     const driver = String(getField(row, COLUMN_GROUPS.driver) || "NÃO ATRIBUÍDO").trim();
-    const reason = extractReason(row);
     const date = getRowDate(row, fileName);
 
     return {
@@ -243,8 +128,9 @@
       const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
       rows.forEach(function (row) {
-        if (isInsucessoRow(row)) {
-          collectedRows.push(normalizeRow(row, file.name));
+        const classified = classifyInsucessoRow(row);
+        if (classified.isInsucesso) {
+          collectedRows.push(normalizeRow(row, file.name, classified.reason));
         }
       });
     });

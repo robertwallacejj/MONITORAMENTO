@@ -10,7 +10,7 @@ Versão organizada com **menu inicial** e cinco módulos principais:
 ## Estrutura
 
 ```text
-Monitoramento-main/
+./
 ├── assets/
 │   ├── css/
 │   │   ├── style.css
@@ -22,6 +22,7 @@ Monitoramento-main/
 │       │   ├── config.js
 │       │   ├── runtime.js
 │       │   ├── utils.js
+│       │   ├── domain.js
 │       │   ├── i18n.js
 │       │   └── main.js
 │       └── modules/

@@ -717,7 +717,7 @@
       rows.map(function (item) {
         const pendencias = Number(item.pendente || 0) + Number(item.naoEntregue || 0);
         const slaInfo = getSlaColor(item.taxa);
-        return `<tr><td><strong>${escapeHtml(item.base)}</strong></td><td>${escapeHtml(item.regional || '-')}</td><td class="t-right">${formatNumber(item.total)}</td><td class="t-right">${formatNumber(item.entregue)}</td><td class="t-right">${formatNumber(item.insucesso)}</td><td class="t-right">${formatNumber(pendencias)}</td><td class="t-right"><span class="sla-badge ${slaInfo.class}">${formatPercent(item.taxa, 1)}</span></td></tr>`;
+        return `<tr><td><strong>${escapeHtml(item.base)}</strong></td><td data-no-i18n>${escapeHtml(item.regional || '-')}</td><td class="t-right">${formatNumber(item.total)}</td><td class="t-right">${formatNumber(item.entregue)}</td><td class="t-right">${formatNumber(item.insucesso)}</td><td class="t-right">${formatNumber(pendencias)}</td><td class="t-right"><span class="sla-badge ${slaInfo.class}">${formatPercent(item.taxa, 1)}</span></td></tr>`;
       }).join('') || '<tr><td colspan="7" class="t-center">Sem dados para a seleção atual.</td></tr>',
       '</tbody></table></div>'
     ].join('');
