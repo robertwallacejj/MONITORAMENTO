@@ -8,10 +8,11 @@
   <link rel="stylesheet" href="../assets/css/style.css" />
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script defer src="../assets/js/core/config.js"></script>
   <script defer src="../assets/js/core/runtime.js"></script>
   <script defer src="../assets/js/core/utils.js"></script>
+  <script defer src="../assets/js/core/domain.js"></script>
   <script defer src="../assets/js/modules/excel.js"></script>
   <script defer src="../assets/js/modules/metrics.js"></script>
   <script defer src="../assets/js/modules/charts.js"></script>
@@ -86,7 +87,7 @@
 
         <div class="field-inline">
           <label for="regionalFilter">Regional</label>
-          <select id="regionalFilter"><option value="all">Todas</option></select>
+          <select id="regionalFilter" data-no-i18n><option value="all">Todas</option></select>
         </div>
 
         <div class="field-inline">
@@ -100,7 +101,7 @@
 
         <div class="field-inline">
           <label for="baseFilter">Base</label>
-          <select id="baseFilter"><option value="all">Todas as bases</option></select>
+          <select id="baseFilter" data-no-i18n><option value="all">Todas as bases</option></select>
         </div>
 
         <div class="field-inline">
@@ -124,7 +125,7 @@
           <button class="btn-secondary" id="downloadToggle" type="button">Baixar imagens ▾</button>
           <div class="download-list" id="downloadList" hidden>
             <label><input type="checkbox" id="selectAllDownloads" /> Selecionar todos</label>
-            <div id="downloadItems" class="download-items"></div>
+            <div id="downloadItems" class="download-items" data-no-i18n></div>
             <button class="btn-secondary full" id="downloadSelected" type="button">Baixar selecionados</button>
           </div>
         </div>

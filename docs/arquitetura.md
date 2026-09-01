@@ -14,6 +14,7 @@
 - `assets/js/core/config.js`: metadados, rotas de páginas, chaves de storage e dependências por módulo.
 - `assets/js/core/runtime.js`: aviso de bibliotecas ausentes (checa `window.CTConfig.dependencies`).
 - `assets/js/core/utils.js`: helpers comuns (DOM, formatação pt-BR, escape de HTML, `localStorage` seguro).
+- `assets/js/core/domain.js`: regras de negócio compartilhadas entre `excel.js`, `metrics.js`, `insucessos-metrics.js` e `acompanhamento-geral.js` — aliases de coluna, mapa de regionais por base e a classificação de uma linha em entregue/insucesso/pendente (`window.CTDomain`). Existe para que Dashboard e Insucessos sempre contem os mesmos números a partir do mesmo arquivo.
 - `assets/js/core/main.js`: bootstrap do dashboard.
 - `assets/js/core/i18n.js`: botão "Tradução híbrida em chinês simplificado" no topo de todas as páginas. Ao ativar, troca o texto fixo da interface por 中文 (linha principal) com o português menor abaixo (`<ruby>`), mantendo números e códigos de base intactos. Tradução via API pública do Google (reserva: MyMemory) + glossário curado, com cache em `localStorage` e reaplicação via `MutationObserver`. Expõe `window.CTI18n`.
 

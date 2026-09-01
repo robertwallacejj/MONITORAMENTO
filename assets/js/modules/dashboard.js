@@ -25,6 +25,7 @@
 
   function saveLocalState() {
     U.storageSet(STORAGE_KEY, {
+      rows: state.rows,
       lastUpdate: state.lastUpdate,
       listsExpanded: state.listsExpanded
     });
@@ -33,7 +34,7 @@
   function loadLocalState() {
     const stored = U.storageGet(STORAGE_KEY, null);
     if (!stored) return;
-    state.rows = [];
+    state.rows = Array.isArray(stored.rows) ? stored.rows : [];
     state.lastUpdate = stored.lastUpdate || null;
     state.listsExpanded = Boolean(stored.listsExpanded);
   }
@@ -233,7 +234,7 @@
     return drivers.map(function (item) {
       return [
         "<tr>",
-        "<td>" + U.escapeHtml(item.driver) + "</td>",
+        '<td data-no-i18n>' + U.escapeHtml(item.driver) + "</td>",
         "<td>" + U.escapeHtml(item.base) + "</td>",
         '<td class="t-right">' + U.formatNumber(item.total) + "</td>",
         '<td class="t-right">' + U.formatPercent(item.taxa, 1) + "</td>",
@@ -332,7 +333,7 @@
 
         return [
           '<tr>',
-          '<td class="driver-name-cell">' + U.escapeHtml(item.driver) + '</td>',
+          '<td class="driver-name-cell" data-no-i18n>' + U.escapeHtml(item.driver) + '</td>',
           '<td class="t-right">' + U.formatNumber(item.pendente) + '</td>',
           '<td class="t-right">' + U.formatNumber(item.entregue) + '</td>',
           '<td class="t-right">' + U.formatNumber(item.insucesso) + '</td>',
@@ -393,7 +394,7 @@
       '<div class="header-left">',
       '<div class="base-name-label">Base</div>',
       '<h3 class="base-name-value">' + U.escapeHtml(item.base) + '</h3>',
-      '<div class="text-soft">' + U.escapeHtml(item.regional) + '</div>',
+      '<div class="text-soft" data-no-i18n>' + U.escapeHtml(item.regional) + '</div>',
       '</div>',
 
       '<div class="header-center-logo">',
@@ -417,7 +418,7 @@
       '<div class="mini-info-pill">Pendente: <strong>' + U.formatNumber(item.pendente) + '</strong></div>',
       '<div class="mini-info-pill">Não entregue: <strong>' + U.formatNumber(item.naoEntregue) + '</strong></div>',
       '<div class="mini-info-pill">Meta: <strong>' + (item.taxa >= target ? 'OK' : 'Ação') + '</strong></div>',
-      '<div class="mini-info-pill">Regional: <strong>' + U.escapeHtml(item.regional) + '</strong></div>',
+      '<div class="mini-info-pill">Regional: <strong data-no-i18n>' + U.escapeHtml(item.regional) + '</strong></div>',
       '</div>',
 
       buildBaseDriversHtml(baseDrivers),
